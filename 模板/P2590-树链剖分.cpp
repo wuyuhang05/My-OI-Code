@@ -231,6 +231,7 @@ int main(){
         modify(i,x);
     }
     int q;Read(q);
+
     while(q--){
         char cmd[sizeof("CHANGE")];
         int a,b;
