@@ -19,7 +19,7 @@ int main(){
 		int x = i;
 		do
 			a[i] += x%10;
-		while(a[i]/=10);
+		while(x/=10);
 	}
 	int L,R;
 	LL ans = 0;
