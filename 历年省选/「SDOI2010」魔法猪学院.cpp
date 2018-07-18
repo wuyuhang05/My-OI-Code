@@ -17,6 +17,7 @@ struct Node{
         Edge *next;
 
         Edge(Node *s,Node *t,double w) : s(s), t(t), w(w), next(s->firstEdge) {}
+
     };
     Edge *firstEdge;
 }node[MAXN],_node[MAXN];
