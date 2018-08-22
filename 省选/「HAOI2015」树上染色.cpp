@@ -73,6 +73,6 @@ int main(){
 	}
 	dfs(&node[1],&node[0]);
 	printf("%lld\n",f[1][K]);
-	getchar();getchar();
+	// getchar();getchar();
 	return 0;
 }
