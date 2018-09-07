@@ -57,34 +57,31 @@ using namespace fastIO;
 
 const int MAXN = 100000 + 5;
 
-int N;
-int l[MAXN],r[MAXN],a[MAXN];
-int s[MAXN];
-LL ans;
+struct Bridge{
+    int a,b,c;
 
-inline void solve(){
-    int top;
-    s[top=0] = 0;
-    FOR(i,1,N){
-        while(top && a[i] >= a[s[top]]) top--;
-        l[i] = s[top] + 1;
-        s[++top] = i;
+    bool operator < (const Bridge &other) const {
+        if(a == other.a) return b < other.b;
+        return a < other.a;
     }
-    s[top=0] = N + 1;
-    RFOR(i,N,1){
-        while(top && a[i] > a[s[top]]) top--;
-        r[i] = s[top]-1;
-        s[++top] = i;
-    }
-    FOR(i,1,N) ans += (LL)a[i] * (i-l[i]+1) * (r[i]-i+1);
-}
+}b[MAXN];
+
+int N,ans;
 
 int main(){
     read(N);
-    FOR(i,1,N) read(a[i]);
-    solve();
-    FOR(i,1,N) a[i] *= -1;
-    solve();
-    printf("%lld\n",ans);
+    FOR(i,1,N){
+        read(b[i].a);read(b[i].b);read(b[i].c);
+    }
+    std::sort(b + 1,b + N + 1);
+    int right = 0;
+    FOR(i,1,N){
+        if(b[i].a > right){
+            ans++;
+            right = b[i].b;
+        }
+        else right = std::min(right,b[i].b);
+    }
+    printf("%d\n",ans);
     return 0;
 }

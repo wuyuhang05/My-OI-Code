@@ -55,36 +55,81 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 100000 + 5;
+const int MAXN = 1000 + 5;
+const int MAXL = 20000 + 5;
+
+struct Node{
+    int a,b;
+    LL ab;
+    bool operator < (const Node &other) const {
+        return ab < other.ab;
+    }
+}p[MAXN];
 
 int N;
-int l[MAXN],r[MAXN],a[MAXN];
-int s[MAXN];
-LL ans;
+int sum[MAXL],ans[MAXL],add[MAXL];
 
-inline void solve(){
-    int top;
-    s[top=0] = 0;
-    FOR(i,1,N){
-        while(top && a[i] >= a[s[top]]) top--;
-        l[i] = s[top] + 1;
-        s[++top] = i;
+void times(int x){
+    CLR(add,0);
+    FOR(i,1,ans[0]){
+        ans[i] = ans[i] * x;
+        add[i+1] += ans[i] / 10;
+        ans[i] %= 10;
     }
-    s[top=0] = N + 1;
-    RFOR(i,N,1){
-        while(top && a[i] > a[s[top]]) top--;
-        r[i] = s[top]-1;
-        s[++top] = i;
+    FOR(i,1,ans[0] + 4){
+        ans[i] += add[i];
+        if(ans[i] >= 10){
+            ans[i+1] += ans[i]/10;
+            ans[i] %= 10;
+        }
+        if(ans[i]){
+            ans[0] = std::max(ans[0],i);
+        }
     }
-    FOR(i,1,N) ans += (LL)a[i] * (i-l[i]+1) * (r[i]-i+1);
+}
+
+void div(int x){
+    CLR(add,0);
+    int q = 0;
+    RFOR(i,ans[0],1){
+        q = q * 10 + ans[i];
+        add[i] = q/x;
+        if(!add[0] && add[i]) add[0] = i;
+        q %= x;
+    }
+}
+
+bool cmp(){
+    if(sum[0] == add[0]){
+        RFOR(i,add[0],1){
+            if(add[i] > sum[i]) return true;
+            if(add[i] < sum[i]) return false;
+        }
+    }
+    if(add[0] > sum[0]) return true;
+    return false;
+}
+
+inline void copy(){
+    CLR(sum,0);
+    RFOR(i,add[0],0){
+        sum[i] = add[i];
+    }
 }
 
 int main(){
     read(N);
-    FOR(i,1,N) read(a[i]);
-    solve();
-    FOR(i,1,N) a[i] *= -1;
-    solve();
-    printf("%lld\n",ans);
+    FOR(i,0,N){
+        read(p[i].a),read(p[i].b);
+        p[i].ab = p[i].a * p[i].b;
+    }
+    std::sort(p + 1,p + N + 1);
+    ans[0] = ans[1] = 1;
+    FOR(i,1,N){
+        times(p[i-1].a);
+        div(p[i].b);
+        if(cmp()) copy();
+    }
+    RFOR(i,sum[0],1) printf("%d",sum[i]);
     return 0;
 }

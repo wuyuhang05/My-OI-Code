@@ -55,36 +55,37 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 100000 + 5;
+const int MAXN = 20000 + 5;
 
-int N;
-int l[MAXN],r[MAXN],a[MAXN];
-int s[MAXN];
-LL ans;
+int N,M;
+struct Node{
+    int a,b,d;
+    bool operator < (const Node &other) const {
+        if(d != other.d) return d < other.d;
+        if(d <= 0) return a < other.a;
+        return b > other.b;
+    }
+}p[MAXN];
 
 inline void solve(){
-    int top;
-    s[top=0] = 0;
+    read(N);
     FOR(i,1,N){
-        while(top && a[i] >= a[s[top]]) top--;
-        l[i] = s[top] + 1;
-        s[++top] = i;
+        read(p[i].a);read(p[i].b);
+        if(p[i].a > p[i].b) p[i].d = 1;
+        if(p[i].a == p[i].b) p[i].d = 0;
+        if(p[i].a < p[i].b) p[i].d = -1;
     }
-    s[top=0] = N + 1;
-    RFOR(i,N,1){
-        while(top && a[i] > a[s[top]]) top--;
-        r[i] = s[top]-1;
-        s[++top] = i;
+    std::sort(p + 1,p + N + 1);
+    LL sum = 0,ans = 0;
+    FOR(i,1,N){
+        sum += p[i].a;
+        ans = std::max(ans,sum) + p[i].b;
     }
-    FOR(i,1,N) ans += (LL)a[i] * (i-l[i]+1) * (r[i]-i+1);
+    printf("%lld\n",ans);
 }
 
 int main(){
-    read(N);
-    FOR(i,1,N) read(a[i]);
-    solve();
-    FOR(i,1,N) a[i] *= -1;
-    solve();
-    printf("%lld\n",ans);
+    int T;read(T);
+    while(T--) solve();
     return 0;
 }

@@ -55,36 +55,34 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 100000 + 5;
+const int MAXN = 5000 + 5;
+
+struct Node{
+    int a,b;
+
+    bool operator < (const Node &other) const {
+        if(a == other.a) return b > other.b;
+        return a > other.a;
+    }
+}a[MAXN];
 
 int N;
-int l[MAXN],r[MAXN],a[MAXN];
-int s[MAXN];
-LL ans;
-
-inline void solve(){
-    int top;
-    s[top=0] = 0;
-    FOR(i,1,N){
-        while(top && a[i] >= a[s[top]]) top--;
-        l[i] = s[top] + 1;
-        s[++top] = i;
-    }
-    s[top=0] = N + 1;
-    RFOR(i,N,1){
-        while(top && a[i] > a[s[top]]) top--;
-        r[i] = s[top]-1;
-        s[++top] = i;
-    }
-    FOR(i,1,N) ans += (LL)a[i] * (i-l[i]+1) * (r[i]-i+1);
-}
+int f[MAXN];
 
 int main(){
     read(N);
-    FOR(i,1,N) read(a[i]);
-    solve();
-    FOR(i,1,N) a[i] *= -1;
-    solve();
-    printf("%lld\n",ans);
+    FOR(i,1,N){
+        read(a[i].a);read(a[i].b);
+    }
+    std::sort(a + 1,a + N + 1);
+    FOR(i,1,N) f[i] = 1;
+    FOR(i,1,N){
+        FOR(j,1,i){
+            if(a[i].b > a[j].b) f[i] = std::max(f[i],f[j] + 1);
+        }
+    }
+    int ans = 0;
+    FOR(i,1,N) ans = std::max(ans,f[i]);
+    printf("%d\n",ans);
     return 0;
 }
