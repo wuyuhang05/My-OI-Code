@@ -55,64 +55,68 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 4000000 + 5;
+const int MAXN = 1 << 17;
 
-struct Node{
-    int opt,x,pos;
-    bool operator <  (const Node &other) const {
-        if(x == other.x) return opt < other.opt;
-        return x < other.x;
+struct SegmentTree;
+SegmentTree *New(LL ,LL ,SegmentTree *,SegmentTree *);
+
+struct SegmentTree{
+    LL l,r,val;
+    SegmentTree *lc,*rc;
+
+    static SegmentTree *build(LL l,LL r){
+        LL mid = (l + r) >> 1;
+        return (l == r) ? New(l,r,NULL,NULL) : New(l,r,build(l,mid),build(mid+1,r));
     }
-}node[MAXN];
 
-int N,M,cnt,pos[MAXN];
-const int ha = 998244353;
-
-inline LL qpow(LL a,LL n){
-    LL ret = 1ll;
-    while(n){
-        if(n & 1) ret = (ret * a) % ha;
-        a = (a * a) % ha;
-        n >>= 1;
+    inline void pushup(LL opt){
+        if(opt == 1) val = lc->val^rc->val;
+        else val = lc->val|rc->val;
     }
+
+    void update(LL pos,LL x,LL opt){
+        if(l == r){
+            val = x;
+            return;
+        }
+        LL mid = (l + r) >> 1;
+        if(pos <= mid) lc->update(pos,x,-opt);
+        else rc->update(pos,x,-opt);
+        pushup(opt);
+    }
+
+    LL query(LL left,LL right){
+        if(left == l and right == r) return val;
+        LL mid = (l + r) >> 1;
+        if(right <= mid) return lc->query(l,r);
+        if(left > mid) return rc->query(l,r);
+        return query(l,mid)^query(mid+1,r);
+    }
+}pool[MAXN << 2],*frog = pool,*segt;
+
+SegmentTree *New(LL l,LL r,SegmentTree *lc,SegmentTree *rc){
+    SegmentTree *ret = ++frog;
+    ret->l = l;ret->r = r;
+    ret->lc = lc;ret->rc = rc;
     return ret;
 }
 
+LL N,M;
+
 int main(){
-    freopen("money.in","r",stdin);
-    freopen("money.out","w",stdout);
     read(N);read(M);
+    LL opt = (N & 1) ? -1 : 1;
+    N = 1 << N;
+    segt = SegmentTree::build(1,N);
     FOR(i,1,N){
-        int l,r;
-        read(l);read(r);
-        node[++cnt] = (Node){1,l,i};
-        node[++cnt] = (Node){3,r,i};
+        int x;read(x);
+        segt->update(i,x,opt);
     }
-    FOR(i,1,M){
-        int k;read(k);
-        node[++cnt] = (Node){2,k,i};
+    while(M--){
+        int pos,x;
+        read(pos);read(x);
+        segt->update(pos,x,opt);
+        printf("%lld\n",segt->query(1,N));
     }
-    std::sort(node + 1,node + cnt + 1);
-    LL ans = 0ll;
-    LL s = 0,tot = 0,last= 0;
-    FOR(i,1,cnt){
-        Node *v = &node[i];
-        if(v->opt == 1){
-            ++s;
-            pos[v->pos] = last;
-            continue;
-        }
-        if(v->opt == 3){
-            if(pos[v->pos] == last) s--;
-            else{
-                s--;tot--;
-            }
-        }
-        else{
-            ans = (ans + qpow(2,s)%ha - qpow(2,tot)%ha)%ha;
-            tot = s;last = i;
-        }
-    }
-    printf("%lld\n",(ans+ha)%ha);
     return 0;
 }

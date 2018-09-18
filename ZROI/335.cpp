@@ -4,17 +4,20 @@
 #include <climits>
 #include <cstdio>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
 #include <cmath>
 #include <queue>
 #include <stack>
 #include <map>
 #include <set>
 
-#define R register
+#define Re register
 #define LL long long
 #define U unsigned
-#define FOR(i,a,b) for(R int i = a;i <= b;++i)
-#define RFOR(i,a,b) for(R int i = a;i >= b;--i)
+#define FOR(i,a,b) for(Re int i = a;i <= b;++i)
+#define RFOR(i,a,b) for(Re int i = a;i >= b;--i)
+#define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
 #define CLR(i,a) memset(i,a,sizeof(i))
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
@@ -55,64 +58,35 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 4000000 + 5;
-
-struct Node{
-    int opt,x,pos;
-    bool operator <  (const Node &other) const {
-        if(x == other.x) return opt < other.opt;
-        return x < other.x;
-    }
-}node[MAXN];
-
-int N,M,cnt,pos[MAXN];
-const int ha = 998244353;
-
-inline LL qpow(LL a,LL n){
-    LL ret = 1ll;
-    while(n){
-        if(n & 1) ret = (ret * a) % ha;
-        a = (a * a) % ha;
-        n >>= 1;
-    }
-    return ret;
-}
+int N;
+const int MAXN = 5000 + 5;
+LL e[MAXN][MAXN],dist[MAXN];
+bool vis[MAXN];
+LL min = LLONG_MAX;
 
 int main(){
-    freopen("money.in","r",stdin);
-    freopen("money.out","w",stdout);
-    read(N);read(M);
+    read(N);// DEBUG(N);
     FOR(i,1,N){
-        int l,r;
-        read(l);read(r);
-        node[++cnt] = (Node){1,l,i};
-        node[++cnt] = (Node){3,r,i};
-    }
-    FOR(i,1,M){
-        int k;read(k);
-        node[++cnt] = (Node){2,k,i};
-    }
-    std::sort(node + 1,node + cnt + 1);
-    LL ans = 0ll;
-    LL s = 0,tot = 0,last= 0;
-    FOR(i,1,cnt){
-        Node *v = &node[i];
-        if(v->opt == 1){
-            ++s;
-            pos[v->pos] = last;
-            continue;
+        FOR(j,i+1,N){
+            read(e[i][j]);e[j][i] = e[i][j];
+            min = std::min(min,e[i][j]);
         }
-        if(v->opt == 3){
-            if(pos[v->pos] == last) s--;
-            else{
-                s--;tot--;
+    }
+    FOR(i,1,N){
+        dist[i] = LLONG_MAX;
+        FOR(j,1,N)
+            if(i^j){
+                e[i][j] -= min;
+                dist[i] = std::min(dist[i],e[i][j]*2);
             }
-        }
-        else{
-            ans = (ans + qpow(2,s)%ha - qpow(2,tot)%ha)%ha;
-            tot = s;last = i;
-        }
     }
-    printf("%lld\n",(ans+ha)%ha);
+    FOR(i,1,N){
+        LL v = -1;
+        FOR(j,1,N) if(!vis[j] && (v == -1 || dist[j] < dist[v])) v = j;
+        vis[v] = true;
+        FOR(j,1,N) dist[j] = std::min(dist[j],dist[v]+e[v][j]);
+    }
+    FOR(i,1,N) printf("%lld\n",dist[i]+(N-1)*min);
+    // system("Sleep 1000");
     return 0;
 }

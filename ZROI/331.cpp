@@ -26,6 +26,8 @@ int N,top;
 U LL hash[MAXN],a[MAXN];
 
 int main(){
+    freopen("str.in","r",stdin);
+    freopen("str.out","w",stdout);
     scanf("%s",str+1);
     N = strlen(str+1);
     FOR(i,1,N){

@@ -4,17 +4,20 @@
 #include <climits>
 #include <cstdio>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
 #include <cmath>
 #include <queue>
 #include <stack>
 #include <map>
 #include <set>
 
-#define R register
+#define Re register
 #define LL long long
 #define U unsigned
-#define FOR(i,a,b) for(R int i = a;i <= b;++i)
-#define RFOR(i,a,b) for(R int i = a;i >= b;--i)
+#define FOR(i,a,b) for(Re int i = a;i <= b;++i)
+#define RFOR(i,a,b) for(Re int i = a;i >= b;--i)
+#define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
 #define CLR(i,a) memset(i,a,sizeof(i))
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
@@ -55,64 +58,33 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 4000000 + 5;
-
-struct Node{
-    int opt,x,pos;
-    bool operator <  (const Node &other) const {
-        if(x == other.x) return opt < other.opt;
-        return x < other.x;
-    }
-}node[MAXN];
-
-int N,M,cnt,pos[MAXN];
-const int ha = 998244353;
-
-inline LL qpow(LL a,LL n){
-    LL ret = 1ll;
-    while(n){
-        if(n & 1) ret = (ret * a) % ha;
-        a = (a * a) % ha;
-        n >>= 1;
-    }
-    return ret;
-}
+#define P std::make_pair
+const int MAXN = 200000 + 5;
+int N,M,D;
+std::set<std::pair<int,int> > S;
+std::pair<int,int> a[MAXN];
+int pos[MAXN];
 
 int main(){
-    freopen("money.in","r",stdin);
-    freopen("money.out","w",stdout);
-    read(N);read(M);
+    read(N);read(M);read(D);
     FOR(i,1,N){
-        int l,r;
-        read(l);read(r);
-        node[++cnt] = (Node){1,l,i};
-        node[++cnt] = (Node){3,r,i};
+        read(a[i].first);
+        a[i].second = i;
     }
-    FOR(i,1,M){
-        int k;read(k);
-        node[++cnt] = (Node){2,k,i};
-    }
-    std::sort(node + 1,node + cnt + 1);
-    LL ans = 0ll;
-    LL s = 0,tot = 0,last= 0;
-    FOR(i,1,cnt){
-        Node *v = &node[i];
-        if(v->opt == 1){
-            ++s;
-            pos[v->pos] = last;
-            continue;
-        }
-        if(v->opt == 3){
-            if(pos[v->pos] == last) s--;
-            else{
-                s--;tot--;
-            }
+    std::sort(a + 1,a + N + 1);
+    int ans = 0;
+    FOR(i,1,N){
+        if(S.empty() || S.begin()->first >= a[i].first){
+            pos[a[i].second] = ++ans;
+            S.insert(P(a[i].first+D,ans));
         }
         else{
-            ans = (ans + qpow(2,s)%ha - qpow(2,tot)%ha)%ha;
-            tot = s;last = i;
+            pos[a[i].second] = S.begin()->second;
+            S.erase(S.begin());
+            S.insert(P(a[i].first+D,pos[a[i].second]));
         }
     }
-    printf("%lld\n",(ans+ha)%ha);
+    printf("%d\n",ans);
+    FOR(i,1,N) printf("%d%c",pos[i],(i == N) ? '\n' : ' ');
     return 0;
 }

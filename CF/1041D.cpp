@@ -4,17 +4,20 @@
 #include <climits>
 #include <cstdio>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
 #include <cmath>
 #include <queue>
 #include <stack>
 #include <map>
 #include <set>
 
-#define R register
+#define Re register
 #define LL long long
 #define U unsigned
-#define FOR(i,a,b) for(R int i = a;i <= b;++i)
-#define RFOR(i,a,b) for(R int i = a;i >= b;--i)
+#define FOR(i,a,b) for(Re int i = a;i <= b;++i)
+#define RFOR(i,a,b) for(Re int i = a;i >= b;--i)
+#define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
 #define CLR(i,a) memset(i,a,sizeof(i))
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
@@ -55,64 +58,27 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 4000000 + 5;
-
-struct Node{
-    int opt,x,pos;
-    bool operator <  (const Node &other) const {
-        if(x == other.x) return opt < other.opt;
-        return x < other.x;
+const int MAXN = 200000 + 5;
+struct Line{
+    LL l,r;
+    bool operator < (const Line &other) const {
+        return l < other.l;
     }
-}node[MAXN];
-
-int N,M,cnt,pos[MAXN];
-const int ha = 998244353;
-
-inline LL qpow(LL a,LL n){
-    LL ret = 1ll;
-    while(n){
-        if(n & 1) ret = (ret * a) % ha;
-        a = (a * a) % ha;
-        n >>= 1;
-    }
-    return ret;
-}
+}l[MAXN];
+int N,H;
 
 int main(){
-    freopen("money.in","r",stdin);
-    freopen("money.out","w",stdout);
-    read(N);read(M);
-    FOR(i,1,N){
-        int l,r;
-        read(l);read(r);
-        node[++cnt] = (Node){1,l,i};
-        node[++cnt] = (Node){3,r,i};
-    }
-    FOR(i,1,M){
-        int k;read(k);
-        node[++cnt] = (Node){2,k,i};
-    }
-    std::sort(node + 1,node + cnt + 1);
-    LL ans = 0ll;
-    LL s = 0,tot = 0,last= 0;
-    FOR(i,1,cnt){
-        Node *v = &node[i];
-        if(v->opt == 1){
-            ++s;
-            pos[v->pos] = last;
-            continue;
+    read(N);read(H);
+    FOR(i,1,N) read(l[i].l),read(l[i].r);
+    LL ans = H+l[1].r-l[1].l,now=0,last=1;
+    FOR(i,2,N){
+        now += l[i].l-l[i-1].r;
+        while(now >= H){
+            last++;
+            now -= l[last].l-l[last-1].r;
         }
-        if(v->opt == 3){
-            if(pos[v->pos] == last) s--;
-            else{
-                s--;tot--;
-            }
-        }
-        else{
-            ans = (ans + qpow(2,s)%ha - qpow(2,tot)%ha)%ha;
-            tot = s;last = i;
-        }
+        ans = std::max(ans,l[i].r-l[last].l+H-now);
     }
-    printf("%lld\n",(ans+ha)%ha);
+    printf("%lld\n",ans);
     return 0;
 }

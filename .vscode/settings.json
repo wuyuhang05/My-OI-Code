@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "__functional_base": "cpp",
+        "istream": "cpp",
+        "locale": "cpp",
+        "memory": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "__tree": "cpp",
+        "bitset": "cpp",
+        "set": "cpp",
+        "algorithm": "cpp"
+    }
+}
