@@ -27,6 +27,14 @@
         "string_view": "cpp",
         "chrono": "cpp",
         "limits": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "iterator": "cpp",
+        "__split_buffer": "cpp",
+        "deque": "cpp",
+        "vector": "cpp",
+        "__locale": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "cstdio": "cpp"
     }
 }
