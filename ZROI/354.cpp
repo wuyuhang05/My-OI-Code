@@ -15,9 +15,9 @@
 #define Re register
 #define LL long long
 #define U unsigned
-#define FOR(i,a,b) for(Re int i = a;i <= b;++i)
-#define RFOR(i,a,b) for(Re int i = a;i >= b;--i)
-#define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
+#define FOR(i,a,b) for(Re LL i = a;i <= b;++i)
+#define RFOR(i,a,b) for(Re LL i = a;i >= b;--i)
+#define SFOR(i,a,b,c) for(Re LL i = a;i <= b;i+=c)
 #define CLR(i,a) memset(i,a,sizeof(i))
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
@@ -58,42 +58,41 @@ namespace fastIO{
 }; 
 // using namespace fastIO;
 
-const int MAXN = 1000000 + 5;
-int N;
-char str[MAXN];
-LL f[MAXN][2];
+const int MAXN = 200000 + 5;
 
-bool equ(const std::string &x,int i){
-    int cnt = i,len = x.length();// DEBUG(len);
-    RFOR(i,len-1,0){
-        if(str[cnt] != x[i]) return false;
-        cnt--;
+LL T,N;
+int a[MAXN],b[MAXN];
+char str[MAXN];
+char ch;
+
+inline void solve(){
+    #define BFOR(i,a,b) for(LL i = a;i <= b;i <<= 1)
+    LL len = 2*N+2;
+    BFOR(S,1,T){
+        if(T&S){
+            FOR(i,1,N){
+                LL l = i-S%len,r = i+S%len;
+                if(l < 0) l = -l;
+                if(l > N+1) l = len-l;
+                if(r > N+1) r = len-r;
+                if(r < 0) r = -r;
+                b[i] = a[l] ^ a[r];
+            }
+            // std::swap(a,b);
+            FOR(i,1,N) a[i] = b[i];
+        }
     }
-    return true;
+    #undef BFOR
 }
 
-const int ha = 1000000000 + 7;
-
 int main(){
+    scanf("%lld%lld",&T,&N);
     scanf("%s",str + 1);
-    N = strlen(str + 1);// DEBUG(N);
-    f[0][0] = 1;
     FOR(i,1,N){
-        if(i >= 1) f[i][0] = (f[i][0] + f[i-1][0] + f[i-1][1])%ha;
-        if(i >= 2) f[i][0] = (f[i][0] + f[i-2][0] + f[i-2][1])%ha;
-        if(i >= 3){
-            if(equ("010",i))
-                f[i][0] = (f[i][0] + f[i-3][0])%ha;
-            else f[i][0] = (f[i][0] + f[i-3][0] + f[i-3][1])%ha;
-        }
-        if(i >= 4){
-            if(equ("1100",i))
-                f[i][1] = (f[i][1] + f[i-4][0] + f[i-4][1])%ha;
-            // 1111 / 1110 / 0101 / 0011
-            else if(equ("1111",i) || equ("1110",i) || equ("0101",i) || equ("0011",i));
-            else f[i][0] = (f[i][0] + f[i-4][0] + f[i-4][1])%ha;
-        }
-    }
-    printf("%lld\n",(f[N][0] + f[N][1])%ha);
+        a[i] = str[i] - '0';
+    }   
+    solve();
+    FOR(i,1,N) putchar(a[i]+'0');
+    puts("");
     return 0;
 }

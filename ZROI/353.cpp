@@ -56,44 +56,63 @@ namespace fastIO{
     #undef OUT_SIZE 
     #undef BUF_SIZE 
 }; 
-// using namespace fastIO;
+using namespace fastIO;
 
-const int MAXN = 1000000 + 5;
-int N;
-char str[MAXN];
-LL f[MAXN][2];
+const int MAXN = 100000 + 5;
 
-bool equ(const std::string &x,int i){
-    int cnt = i,len = x.length();// DEBUG(len);
-    RFOR(i,len-1,0){
-        if(str[cnt] != x[i]) return false;
-        cnt--;
-    }
-    return true;
+struct Node{
+    struct Edge *firstEdge;
+    Node *fa;
+    int depth;bool vis;
+}node[MAXN];
+
+struct Edge{
+    Node *s,*t;
+    Edge *next;
+}pool[MAXN*2],*frog = pool;
+
+inline Edge *New(Node *s,Node *t){
+    Edge *ret = ++frog;
+    ret->s = s;ret->t = t;
+    ret->next = s->firstEdge;
+    return ret;
 }
 
-const int ha = 1000000000 + 7;
+inline void add(int u,int v){
+    node[u].firstEdge = New(&node[u],&node[v]);
+    node[v].firstEdge = New(&node[v],&node[u]);
+}
 
-int main(){
-    scanf("%s",str + 1);
-    N = strlen(str + 1);// DEBUG(N);
-    f[0][0] = 1;
-    FOR(i,1,N){
-        if(i >= 1) f[i][0] = (f[i][0] + f[i-1][0] + f[i-1][1])%ha;
-        if(i >= 2) f[i][0] = (f[i][0] + f[i-2][0] + f[i-2][1])%ha;
-        if(i >= 3){
-            if(equ("010",i))
-                f[i][0] = (f[i][0] + f[i-3][0])%ha;
-            else f[i][0] = (f[i][0] + f[i-3][0] + f[i-3][1])%ha;
-        }
-        if(i >= 4){
-            if(equ("1100",i))
-                f[i][1] = (f[i][1] + f[i-4][0] + f[i-4][1])%ha;
-            // 1111 / 1110 / 0101 / 0011
-            else if(equ("1111",i) || equ("1110",i) || equ("0101",i) || equ("0011",i));
-            else f[i][0] = (f[i][0] + f[i-4][0] + f[i-4][1])%ha;
+void dfs(Node *v,Node *fa){
+    #define EFOR(i,v) for(Edge *i = v->firstEdge;i;i = i->next)
+    v->fa = fa;
+    EFOR(e,v){
+        if(e->t != fa){
+            e->t->depth = v->depth + 1;
+            dfs(e->t,v);
         }
     }
-    printf("%lld\n",(f[N][0] + f[N][1])%ha);
+}
+
+int N,M;
+
+int main(){
+    read(N);read(M);
+    FOR(i,1,N-1){
+        int u,v;read(u);read(v);
+        add(u,v);
+    }
+    dfs(&node[1],NULL);
+    LL ans = 0ll;
+    while(M--){
+        int x;read(x);
+        Node *v = &node[x];
+        while(v->fa && !v->vis){
+            v->vis = true;
+            v = v->fa;
+            ans++;
+        }
+        printf("%lld\n",ans*2 - node[x].depth);
+    }
     return 0;
 }

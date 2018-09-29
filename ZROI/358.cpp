@@ -56,44 +56,42 @@ namespace fastIO{
     #undef OUT_SIZE 
     #undef BUF_SIZE 
 }; 
-// using namespace fastIO;
+using namespace fastIO;
 
-const int MAXN = 1000000 + 5;
-int N;
-char str[MAXN];
-LL f[MAXN][2];
+const int MAXN = 1000 + 5;
 
-bool equ(const std::string &x,int i){
-    int cnt = i,len = x.length();// DEBUG(len);
-    RFOR(i,len-1,0){
-        if(str[cnt] != x[i]) return false;
-        cnt--;
-    }
-    return true;
-}
-
-const int ha = 1000000000 + 7;
+int a[MAXN][MAXN],b[MAXN][MAXN];
+int N,M;
+#define P std::pair<int,int>
+#define MP std::make_pair
+int p[MAXN],top,ans;
 
 int main(){
-    scanf("%s",str + 1);
-    N = strlen(str + 1);// DEBUG(N);
-    f[0][0] = 1;
-    FOR(i,1,N){
-        if(i >= 1) f[i][0] = (f[i][0] + f[i-1][0] + f[i-1][1])%ha;
-        if(i >= 2) f[i][0] = (f[i][0] + f[i-2][0] + f[i-2][1])%ha;
-        if(i >= 3){
-            if(equ("010",i))
-                f[i][0] = (f[i][0] + f[i-3][0])%ha;
-            else f[i][0] = (f[i][0] + f[i-3][0] + f[i-3][1])%ha;
-        }
-        if(i >= 4){
-            if(equ("1100",i))
-                f[i][1] = (f[i][1] + f[i-4][0] + f[i-4][1])%ha;
-            // 1111 / 1110 / 0101 / 0011
-            else if(equ("1111",i) || equ("1110",i) || equ("0101",i) || equ("0011",i));
-            else f[i][0] = (f[i][0] + f[i-4][0] + f[i-4][1])%ha;
+    read(N);read(M);
+    FOR(i,1,N) FOR(j,1,M) read(a[i][j]),b[i][j] = 1;
+    FOR(j,2,M){
+        FOR(i,2,N){
+            if(a[i][j]+a[i-1][j-1] <= a[i-1][j] + a[i][j-1])
+                b[i][j] = b[i-1][j]+1;
         }
     }
-    printf("%lld\n",(f[N][0] + f[N][1])%ha);
+    FOR(i,1,N) FOR(j,1,M) if(b[i][j] == 1) --b[i][j];
+    p[0] = 1;
+    FOR(i,2,N){
+        int h = 0;
+        FOR(j,2,M){
+            while(h&&b[i][j] <= b[i][p[h]]){
+                ans = std::max(ans,b[i][p[h]]*(j-p[h-1]));
+                h--;
+            }
+            p[++h] = j;
+            // DEBUG(h);
+        }
+        while(h){
+            ans = std::max(ans,b[i][p[h]]*(M+1-p[h-1]));
+            h--;
+        }
+    }
+    printf("%d\n",ans);
     return 0;
 }

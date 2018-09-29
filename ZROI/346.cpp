@@ -56,44 +56,48 @@ namespace fastIO{
     #undef OUT_SIZE 
     #undef BUF_SIZE 
 }; 
-// using namespace fastIO;
+using namespace fastIO;
 
-const int MAXN = 1000000 + 5;
-int N;
-char str[MAXN];
-LL f[MAXN][2];
+const int MAXN = 50 + 5;
+const int MAXM = 500 + 5;
+const LL INF = 0x3f3f3f;
 
-bool equ(const std::string &x,int i){
-    int cnt = i,len = x.length();// DEBUG(len);
-    RFOR(i,len-1,0){
-        if(str[cnt] != x[i]) return false;
-        cnt--;
+LL N,M;
+LL v[MAXN],a[MAXN];
+LL f[MAXN][MAXM]; // 2...i 号政党获得的席位为 j,留给 i+1 号政党的最大票数
+
+inline bool check(int mid){
+    CLR(f,0x3f);
+    f[1][0] = 0;
+    FOR(i,2,N-1){
+        FOR(j,0,M){ // 枚举 2...i 个政党总共获得的席位
+            FOR(k,0,j){ // 枚举第 i 个政党获得的席位
+                LL gx = ((k+1)*v[1])/mid-v[i]-f[i-1][j-k];
+                if(gx >= 0) f[i][j] = std::min(f[i][j],std::max(a[i]-gx,0ll));
+            }
+        }
     }
-    return true;
+    LL xN = INF; // 最后一个政党获得的席位
+    FOR(i,0,M){ // 枚举 2...N-1 个政党总共获得的席位并确认方案是否可行
+        if(f[N-1][i] >= INF) continue;
+        LL t = (v[N]+f[N-1][i])*mid-1;
+        // DEBUG(t);
+        xN = std::min(xN,std::max(0ll,t/v[1])+i);
+    }
+    return M-mid >= xN;
 }
 
-const int ha = 1000000000 + 7;
-
 int main(){
-    scanf("%s",str + 1);
-    N = strlen(str + 1);// DEBUG(N);
-    f[0][0] = 1;
-    FOR(i,1,N){
-        if(i >= 1) f[i][0] = (f[i][0] + f[i-1][0] + f[i-1][1])%ha;
-        if(i >= 2) f[i][0] = (f[i][0] + f[i-2][0] + f[i-2][1])%ha;
-        if(i >= 3){
-            if(equ("010",i))
-                f[i][0] = (f[i][0] + f[i-3][0])%ha;
-            else f[i][0] = (f[i][0] + f[i-3][0] + f[i-3][1])%ha;
-        }
-        if(i >= 4){
-            if(equ("1100",i))
-                f[i][1] = (f[i][1] + f[i-4][0] + f[i-4][1])%ha;
-            // 1111 / 1110 / 0101 / 0011
-            else if(equ("1111",i) || equ("1110",i) || equ("0101",i) || equ("0011",i));
-            else f[i][0] = (f[i][0] + f[i-4][0] + f[i-4][1])%ha;
-        }
+    read(N);read(M);
+    FOR(i,1,N) read(v[i]);
+    FOR(i,1,N) read(a[i]);
+    v[1] += a[1] + a[N]; // 断环为链
+    LL L = 0,R = M + 1,ans;
+    while(L <= R){
+        LL mid = (L + R) >> 1;
+        if(check(mid)) ans = mid,L = mid + 1;
+        else R = mid - 1;
     }
-    printf("%lld\n",(f[N][0] + f[N][1])%ha);
+    printf("%lld\n",ans);
     return 0;
 }
