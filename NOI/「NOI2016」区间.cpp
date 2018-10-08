@@ -16,8 +16,9 @@
 #define LL long long
 #define U unsigned
 #define FOR(i,a,b) for(Re int i = a;i <= b;++i)
-#define RFOR(i,a,b) for(Re int i = a;i >= b;--i)
+#define ROF(i,a,b) for(Re int i = a;i >= b;--i)
 #define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
+#define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
 #define CLR(i,a) memset(i,a,sizeof(i))
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
@@ -58,13 +59,25 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 50000 + 5;
+const int MAXN = 500000 + 5;
+
+struct Data{
+    int l,r,ll,rr,pos; // lisan_l,lisan_r;
+    int len;
+    
+    bool operator < (const Data &other) const {
+        return len < other.len;
+    }
+}d[MAXN];
+
+int N,M;
+std::map<int,int> S;
+#define MP std::make_pair
 
 struct SegmentTree *New(int ,int ,SegmentTree *,SegmentTree *);
 
 struct SegmentTree{
-    int l,r;
-    LL lmax,rmax,mmax,sum; //前缀 max，后缀 max，跨越中点 max，和。
+    int l,r,max,tag;
     SegmentTree *lc,*rc;
 
     static SegmentTree *build(int l,int r){
@@ -72,68 +85,73 @@ struct SegmentTree{
         return (l == r) ? New(l,r,NULL,NULL) : New(l,r,build(l,mid),build(mid+1,r));
     }
 
-    inline void pushup(){
-        sum = lc->sum + rc->sum;
-        lmax = std::max(lc->lmax,lc->sum + rc->lmax);
-        rmax = std::max(rc->rmax,lc->rmax + rc->sum);
-        mmax = std::max(std::max(lc->mmax,rc->mmax),lc->rmax + rc->lmax);
+    inline void cover(int delta){
+        max += delta;
+        tag += delta;
     }
 
-    inline void update(int pos,int x){
-        if(l == r){
-            lmax = rmax = mmax = sum = x;
+    inline void pushdown(){
+        if(tag){
+            lc->cover(tag);
+            rc->cover(tag);
+            tag = 0;
+        }
+    }
+
+    inline void pushup(){
+        max = std::max(lc->max,rc->max);
+    }
+
+    inline void modify(int L,int R,int delta=1){
+        if(L == l && R == r){
+            cover(delta);
             return;
         }
+        pushdown();
         int mid = (l + r) >> 1;
-        if(pos <= mid) lc->update(pos,x);
-        else rc->update(pos,x);
+        if(R <= mid) lc->modify(L,R,delta);
+        else if(L > mid) rc->modify(L,R,delta);
+        else lc->modify(L,mid,delta),rc->modify(mid+1,R,delta);
         pushup();
     }
-
-    inline SegmentTree query(int L,int R){
-        if(L == l && R == r)
-            return (SegmentTree){0,0,lmax,rmax,mmax,sum,NULL,NULL};
-        int mid = (l + r) >> 1;
-        if(R <= mid) return lc->query(L,R);
-        if(L > mid) return rc->query(L,R);
-        SegmentTree lans = lc->query(L,mid),rans = rc->query(mid + 1,R),ans;
-        ans.lmax = std::max(lans.lmax,lans.sum + rans.lmax);
-        ans.rmax = std::max(rans.rmax,rans.sum + lans.rmax);
-        ans.sum = lans.sum + rans.sum;
-        ans.mmax = std::max(std::max(lans.mmax,rans.mmax),lans.rmax + rans.lmax);
-        return ans;
-    }
-}pool[MAXN<<2],*frog = pool,*segt;
+}pool[(MAXN<<3) + 1],*frog = pool,*segt;
 
 SegmentTree *New(int l,int r,SegmentTree *lc,SegmentTree *rc){
     SegmentTree *ret = ++frog;
     ret->l = l;ret->r = r;
     ret->lc = lc;ret->rc = rc;
-    ret->lmax = ret->rmax = ret->mmax = INT_MIN;
+    ret->max = ret->tag = 0;
     return ret;
 }
 
-int N,M;
-int opt,x,y;
-SegmentTree ans;
-
 int main(){
-    read(N);
-    segt = SegmentTree::build(1,N);
+    read(N);read(M);
     FOR(i,1,N){
-        int x;
-        read(x);
-        segt->update(i,x);
+        read(d[i].l);read(d[i].r);
+        d[i].len = d[i].r-d[i].l + 1;d[i].pos = i;
+        S.insert(MP(d[i].l,0));
+        S.insert(MP(d[i].r,0));
     }
-    read(M);
-    while(M--){
-        read(opt);read(x);read(y);
-        if(opt){
-            printf("%lld\n",segt->query(x,y).mmax);
-        }
-        else{
-            segt->update(x,y);
+    int cnt = 0;
+    for(std::map<int,int>::iterator it = S.begin();it != S.end();++it){
+        it->second = ++cnt;
+    }
+    FOR(i,1,N){
+        d[i].ll = S[d[i].l];
+        d[i].rr = S[d[i].r];
+    }
+    std::sort(d + 1,d + N + 1);
+    segt = SegmentTree::build(1,N*2);
+    int last = 1,ans = INT_MAX;
+    FOR(i,1,N){
+        segt->modify(d[i].ll,d[i].rr);
+        while(segt->max == M){
+            segt->modify(d[last].ll,d[last].rr,-1);
+            ans = std::min(ans,d[i].len-d[last].len);
+            ++last;
         }
     }
+    ans = (ans == INT_MAX) ? -1 : ans;
+    printf("%d\n",ans);
     return 0;
 }

@@ -16,8 +16,9 @@
 #define LL long long
 #define U unsigned
 #define FOR(i,a,b) for(Re int i = a;i <= b;++i)
-#define RFOR(i,a,b) for(Re int i = a;i >= b;--i)
+#define ROF(i,a,b) for(Re int i = a;i >= b;--i)
 #define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
+#define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
 #define CLR(i,a) memset(i,a,sizeof(i))
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
@@ -58,13 +59,20 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 50000 + 5;
+const int MAXN = 500000 + 5;
 
 struct SegmentTree *New(int ,int ,SegmentTree *,SegmentTree *);
 
+LL qgcd(LL x,LL y){
+    if(!y) return x;
+    return qgcd(y,x%y);
+}
+
+int cnt;
+
 struct SegmentTree{
     int l,r;
-    LL lmax,rmax,mmax,sum; //前缀 max，后缀 max，跨越中点 max，和。
+    LL gcd;
     SegmentTree *lc,*rc;
 
     static SegmentTree *build(int l,int r){
@@ -73,67 +81,78 @@ struct SegmentTree{
     }
 
     inline void pushup(){
-        sum = lc->sum + rc->sum;
-        lmax = std::max(lc->lmax,lc->sum + rc->lmax);
-        rmax = std::max(rc->rmax,lc->rmax + rc->sum);
-        mmax = std::max(std::max(lc->mmax,rc->mmax),lc->rmax + rc->lmax);
+        gcd = qgcd(lc->gcd,rc->gcd);
     }
 
-    inline void update(int pos,int x){
+    inline void update(LL x,int pos){
         if(l == r){
-            lmax = rmax = mmax = sum = x;
+            gcd = x;
             return;
         }
         int mid = (l + r) >> 1;
-        if(pos <= mid) lc->update(pos,x);
-        else rc->update(pos,x);
+        if(pos <= mid) lc->update(x,pos);
+        else rc->update(x,pos);
         pushup();
     }
 
-    inline SegmentTree query(int L,int R){
-        if(L == l && R == r)
-            return (SegmentTree){0,0,lmax,rmax,mmax,sum,NULL,NULL};
+    bool query(int L,int R,int g){
+        // int mid = (L + R) >> 1;
+        // if(l == r) return !(gcd % g);
+        // if(L == l && R == r){
+        //     if(!(gcd % g)) cnt++;
+        //     return cnt <= 1;
+        // }
+        if(l == r){
+            if(!(gcd % g)) return true;
+            return (++cnt) <=1;
+        }
         int mid = (l + r) >> 1;
-        if(R <= mid) return lc->query(L,R);
-        if(L > mid) return rc->query(L,R);
-        SegmentTree lans = lc->query(L,mid),rans = rc->query(mid + 1,R),ans;
-        ans.lmax = std::max(lans.lmax,lans.sum + rans.lmax);
-        ans.rmax = std::max(rans.rmax,rans.sum + lans.rmax);
-        ans.sum = lans.sum + rans.sum;
-        ans.mmax = std::max(std::max(lans.mmax,rans.mmax),lans.rmax + rans.lmax);
-        return ans;
+        if(L == l && R == r){
+            if(g == gcd) return true;
+            if(!(lc->gcd % g)) return rc->query(mid + 1,R,g);
+            if(!(rc->gcd % g)) return lc->query(L,mid,g);
+            return false;
+        }
+        if(R <= mid) return lc->query(L,R,g);
+        else if(L > mid) return rc->query(L,R,g);
+        return lc->query(L,mid,g) && rc->query(mid + 1,R,g);
     }
-}pool[MAXN<<2],*frog = pool,*segt;
+}pool[(MAXN<<2) + 1],*frog = pool,*segt;
 
 SegmentTree *New(int l,int r,SegmentTree *lc,SegmentTree *rc){
     SegmentTree *ret = ++frog;
     ret->l = l;ret->r = r;
     ret->lc = lc;ret->rc = rc;
-    ret->lmax = ret->rmax = ret->mmax = INT_MIN;
+    // ret->gcd = -1;
     return ret;
 }
 
-int N,M;
-int opt,x,y;
-SegmentTree ans;
+int N,Q;
 
 int main(){
     read(N);
     segt = SegmentTree::build(1,N);
     FOR(i,1,N){
-        int x;
-        read(x);
-        segt->update(i,x);
+        LL x;read(x);
+        segt->update(x,i);
     }
-    read(M);
-    while(M--){
-        read(opt);read(x);read(y);
-        if(opt){
-            printf("%lld\n",segt->query(x,y).mmax);
+    read(Q);
+    while(Q--){
+        int l,r,opt;read(opt);read(l);read(r);
+        if(!(opt & 1)){
+            // segt->update(l,r);
+            segt->update(r,l);
         }
         else{
-            segt->update(x,y);
+            LL x;read(x);cnt = 0;
+            printf("%s\n",segt->query(l,r,x) ? "YES" : "NO");
         }
     }
     return 0;
 }
+
+/*
+2 6 3
+
+
+*/

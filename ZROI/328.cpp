@@ -123,6 +123,6 @@ int main(){
     printf("%d %d\n",cnt,l-1);
     FOR(i,1,cnt){
         printf("%d%c",ans[i],(i == cnt) ? '\n' : ' ');
-    }system("Sleep 5");
+    }
     return 0;
 }
