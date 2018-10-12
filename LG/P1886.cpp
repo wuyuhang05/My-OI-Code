@@ -59,51 +59,64 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 5000 + 5;
+const int MAXN = 1000000 + 5;
 
-struct Node{
-    int x,y;
-    double dist;bool used;
-}p[MAXN];
+struct Queue{
+    int q[MAXN],num[MAXN];
+    int head,tail;
 
-double cost(Node *a,Node *b){
-    return sqrt((double)(a->x - b->x) * (double)(a->x - b->x) + (double)(a->y - b->y) * (double)(a->y - b->y));
-}
-
-int N;
-#define MP std::make_pair
-#define P std::pair<int,Node *>
-
-double prim(){
-    FOR(i,1,N){
-        p[i].dist = INT_MAX;
-        p[i].used = false;
+    inline void init(){
+        CLR(q,0);
+        head = 0;tail = -1;
     }
-    std::priority_queue<P,std::vector<P>,std::greater<P> > q;
-    q.push(MP(0,&p[1]));p[1].dist = 0.0;
-    double ret = 0.0;
-    while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
-        if(v->used) continue;
-        v->used = true;
-        ret += v->dist;
-        FOR(i,1,N){
-            Node *vv = &p[i];
-            if(v == vv) continue;
-            double w = cost(v,vv);
-            if(vv->dist > w){
-                vv->dist = w;
-                q.push(MP(vv->dist,vv));
-            }
-        }
+
+    inline void push1(int x,int pos){ // min
+        while(head <= tail && q[tail] >= x) tail--;
+        q[++tail] = x;num[tail] = pos;
     }
-    return ret;
-}
+
+    inline void push2(int x,int pos){ // max
+        while(head <= tail && q[tail] <= x) tail--;
+        q[++tail] = x;num[tail] = pos;
+    }
+
+    inline void pop(int pos){
+        while(num[head] <= pos) head++;
+    }
+
+    inline int calc(){
+        return q[head];
+    }
+
+    inline void DE(){
+        printf("head:%d,tail:%d\n",head,tail);
+        FOR(i,head,tail) printf("%d ",q[i]);
+        puts("");
+    }
+}q1,q2;
+
+int N,K;
+std::vector<int> ans1,ans2;
 
 int main(){
-    read(N);
-    FOR(i,1,N) read(p[i].x),read(p[i].y);
-    printf("%.2f\n",prim());
+    read(N);read(K);
+    q1.init();q2.init();
+    FOR(i,1,N){
+        int x;read(x);
+        q1.push1(x,i);
+        q2.push2(x,i);
+        q1.pop(i-K);
+        q2.pop(i-K);
+        //q1.DE();q2.DE();
+        if(i >= K){
+            ans1.push_back(q1.calc());
+            ans2.push_back(q2.calc());
+        }
+    }
+    int sz = ans1.size()-1;
+    FOR(i,0,sz)
+        printf("%d%c",ans1[i],(i == sz) ? '\n' : ' ');
+    FOR(i,0,sz)
+        printf("%d%c",ans2[i],(i == sz) ? '\n' : ' ');
     return 0;
 }

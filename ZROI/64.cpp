@@ -59,51 +59,25 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 5000 + 5;
+const int MAXN = 1000 + 5;
 
-struct Node{
-    int x,y;
-    double dist;bool used;
-}p[MAXN];
-
-double cost(Node *a,Node *b){
-    return sqrt((double)(a->x - b->x) * (double)(a->x - b->x) + (double)(a->y - b->y) * (double)(a->y - b->y));
-}
-
-int N;
-#define MP std::make_pair
-#define P std::pair<int,Node *>
-
-double prim(){
-    FOR(i,1,N){
-        p[i].dist = INT_MAX;
-        p[i].used = false;
-    }
-    std::priority_queue<P,std::vector<P>,std::greater<P> > q;
-    q.push(MP(0,&p[1]));p[1].dist = 0.0;
-    double ret = 0.0;
-    while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
-        if(v->used) continue;
-        v->used = true;
-        ret += v->dist;
-        FOR(i,1,N){
-            Node *vv = &p[i];
-            if(v == vv) continue;
-            double w = cost(v,vv);
-            if(vv->dist > w){
-                vv->dist = w;
-                q.push(MP(vv->dist,vv));
-            }
-        }
-    }
-    return ret;
-}
+int T;
+LL P,Q;
+LL x[MAXN],y[MAXN];
 
 int main(){
-    read(N);
-    FOR(i,1,N) read(p[i].x),read(p[i].y);
-    printf("%.2f\n",prim());
+    read(T);
+    FOR(i,1,T){
+        read(x[i]);read(y[i]);
+    }
+    P = x[1];Q = y[1];
+    FOR(i,2,T){
+        // DEBUG(P);DEBUG(Q);
+        LL m1 = ceil((double)P/(double)x[i]),m2 = ceil((double)Q/(double)y[i]);
+        // DEBUG(m1);DEBUG(m2);
+        LL m = std::max(m1,m2);
+        P = x[i]*m,Q = y[i]*m;
+    }
+    printf("%lld",P+Q);
     return 0;
 }

@@ -36,6 +36,9 @@
         "queue": "cpp",
         "stack": "cpp",
         "cstdio": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "cuchar": "cpp",
+        "valarray": "cpp",
+        "random": "cpp"
     }
 }

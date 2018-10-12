@@ -23,6 +23,9 @@
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
+const int MAXN = 10000 + 5;
+const int MAXM = 200000 + 5;
+
 namespace fastIO{ 
     #define BUF_SIZE 100000 
     #define OUT_SIZE 100000 
@@ -59,56 +62,98 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 10000 + 5;
-const int MAXM = 200000 + 5;
-
 struct Node{
     struct Edge *firstEdge;
     int dist;
+    bool can,cann;
     bool vis;
+    //DEBUG
 }node[MAXN];
 
 struct Edge{
     Node *s,*t;
     Edge *next;
-}pool[MAXM*2],*frog = pool;
+    bool opt;
+}pool[MAXM<<2],*frog = pool;
 
-Edge *New(Node *s,Node *t){
+Edge *New(Node *s,Node *t,bool opt){
     Edge *ret = ++frog;
     ret->s = s;ret->t = t;
-    ret->next = s->firstEdge;
+    ret->opt = opt;ret->next = s->firstEdge;
     return ret;
 }
 
 inline void add(int u,int v){
-    node[u].firstEdge = New(&node[u],&node[v]);
-    // node[v].firstEdge = New(&node[v],&node[u]);
+    node[u].firstEdge = New(&node[u],&node[v],true);
+    node[v].firstEdge = New(&node[v],&node[u],false);
 }
 
-int N,M;
+int N,M,s,t;
 
-inline void bfs(){
-    std::queue<Node * > q;
-    q.push(&node[N]);
-    node[N].vis = true;
+void bfs1(){
+    std::queue<Node *> q;
+    q.push(&node[t]);
+    node[t].cann = node[t].can = true;
     while(!q.empty()){
         Node *v = q.front();q.pop();
         for(Edge *e = v->firstEdge;e;e = e->next){
-            if(e->t->vis) continue;
-            e->t->dist = v->dist + 1;
-            e->t->vis = true;
-            q.push(e->t);
+            if(e->opt) continue;
+            if(!e->t->can){
+                e->t->cann = e->t->can = true;
+                q.push(e->t);
+            }
         }
+    }
+    FOR(i,1,N){
+        if(!node[i].can){
+            for(Edge *e = node[i].firstEdge;e;e = e->next){
+                if(e->opt) continue;
+                if(e->t->cann){
+                    e->t->cann = false;
+                }
+            }
+        }
+    }
+    FOR(i,1,N){
+        node[i].can = node[i].can & node[i].cann;
     }
 }
 
+int bfs2(){
+    if(!node[s].can) return -1;
+    std::queue<Node *> q;
+    q.push(&node[s]);
+    node[s].vis = true;
+    while(!q.empty()){
+        Node *v = q.front();q.pop();
+        for(Edge *e = v->firstEdge;e;e = e->next){
+            if(!e->opt) continue;
+            if(!e->t->can) continue;
+            if(!e->t->vis){
+                e->t->dist = v->dist + 1;
+                e->t->vis = true;
+                q.push(e->t);
+            }
+        }
+    }
+    return node[t].dist;
+}
+
 int main(){
+    // FOR(i,1,1000) node[i].num = i;
     read(N);read(M);
     FOR(i,1,M){
-        int u,v;read(u);read(v);
-        add(v,u);
+        int x,y;read(x);read(y);
+        if(x == y) continue;
+        add(x,y);
     }
-    bfs();
-    printf("%d\n",node[1].dist);
+    // for(Edge *e = node[4].firstEdge;e;e = e->next){
+    //     DEBUG(e->t->num);DEBUG(e->opt);
+    // }
+    read(s);read(t);
+    bfs1();
+    // FOR(i,1,N) DEBUG(node[i].can);
+    int ans = bfs2();
+    printf("%d\n",ans == 0 ? -1 : ans);
     return 0;
 }

@@ -23,6 +23,8 @@
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
+const int MAXN = 200000 + 5;
+
 namespace fastIO{ 
     #define BUF_SIZE 100000 
     #define OUT_SIZE 100000 
@@ -59,51 +61,65 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 5000 + 5;
-
 struct Node{
-    int x,y;
-    double dist;bool used;
-}p[MAXN];
+    struct Edge *firstEdge;
+    bool vis;
+}node[MAXN];
 
-double cost(Node *a,Node *b){
-    return sqrt((double)(a->x - b->x) * (double)(a->x - b->x) + (double)(a->y - b->y) * (double)(a->y - b->y));
+struct Edge{
+    Node *s,*t;
+    Edge *next;
+}pool[MAXN<<1],*frog = pool;
+
+Edge *New(Node *s,Node *t){
+    Edge *ret = ++frog;
+    ret->s = s;ret->t = t;
+    ret->next = s->firstEdge;
+    return ret;
 }
 
-int N;
-#define MP std::make_pair
-#define P std::pair<int,Node *>
+inline void add(int u,int v){
+    node[u].firstEdge = New(&node[u],&node[v]);
+    node[v].firstEdge = New(&node[v],&node[u]);
+}
 
-double prim(){
-    FOR(i,1,N){
-        p[i].dist = INT_MAX;
-        p[i].used = false;
-    }
-    std::priority_queue<P,std::vector<P>,std::greater<P> > q;
-    q.push(MP(0,&p[1]));p[1].dist = 0.0;
-    double ret = 0.0;
+std::queue<Node *> q,order;
+int N;
+
+bool bfs(){
+#define EFOR(i,v) for(Edge *i = v->firstEdge;i;i = i->next)
+    q.push(&node[1]);order.pop();
+    std::set<Node *> S;
     while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
-        if(v->used) continue;
-        v->used = true;
-        ret += v->dist;
-        FOR(i,1,N){
-            Node *vv = &p[i];
-            if(v == vv) continue;
-            double w = cost(v,vv);
-            if(vv->dist > w){
-                vv->dist = w;
-                q.push(MP(vv->dist,vv));
+        Node *v = q.front();q.pop();
+        v->vis = true;
+        EFOR(e,v){
+            if(!e->t->vis) S.insert(e->t);
+        }
+        while(!S.empty()){
+            if(S.count(order.front())){
+                S.erase(order.front());
+                q.push(order.front());
+                order.pop();
             }
+            else return false;
         }
     }
-    return ret;
+    return true;
+#undef EFOR
 }
 
 int main(){
     read(N);
-    FOR(i,1,N) read(p[i].x),read(p[i].y);
-    printf("%.2f\n",prim());
+    FOR(i,1,N-1){
+        int x,y;read(x);read(y);
+        add(x,y);
+    }
+    FOR(i,1,N){
+        int x;read(x);
+        order.push(&node[x]);
+    }
+    if(bfs()) puts("Yes");
+    else puts("No");
     return 0;
 }

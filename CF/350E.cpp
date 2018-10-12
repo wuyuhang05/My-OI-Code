@@ -59,51 +59,49 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 5000 + 5;
+const int MAXN = 300 + 5;
 
-struct Node{
-    int x,y;
-    double dist;bool used;
-}p[MAXN];
-
-double cost(Node *a,Node *b){
-    return sqrt((double)(a->x - b->x) * (double)(a->x - b->x) + (double)(a->y - b->y) * (double)(a->y - b->y));
-}
-
-int N;
-#define MP std::make_pair
-#define P std::pair<int,Node *>
-
-double prim(){
-    FOR(i,1,N){
-        p[i].dist = INT_MAX;
-        p[i].used = false;
-    }
-    std::priority_queue<P,std::vector<P>,std::greater<P> > q;
-    q.push(MP(0,&p[1]));p[1].dist = 0.0;
-    double ret = 0.0;
-    while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
-        if(v->used) continue;
-        v->used = true;
-        ret += v->dist;
-        FOR(i,1,N){
-            Node *vv = &p[i];
-            if(v == vv) continue;
-            double w = cost(v,vv);
-            if(vv->dist > w){
-                vv->dist = w;
-                q.push(MP(vv->dist,vv));
-            }
-        }
-    }
-    return ret;
-}
+int N,M,K;
+bool vis[MAXN],used[MAXN];
+bool map[MAXN][MAXN];
 
 int main(){
-    read(N);
-    FOR(i,1,N) read(p[i].x),read(p[i].y);
-    printf("%.2f\n",prim());
+    read(N);read(M);read(K);
+    FOR(i,1,K){
+        int x;read(x);
+        vis[x] = 1;
+    }
+    int maxx = (N-1)*(N-2)/2 + N-K;
+    if(N == K || M > maxx){
+        puts("-1");return 0;
+    }
+    int s=1,t,cnt = 0;
+    while(!vis[s]) s++;
+    used[s] = 1;
+    FOR(i,1,N){
+        if(!vis[i]){
+            t = i;
+            used[t] = 1;
+            printf("%d %d\n",s,t);
+            map[s][t] = map[t][s] = true;
+            cnt++;
+        }
+    }
+    FOR(i,1,N){
+        if(used[i]) continue;
+        printf("%d %d\n",i,t);
+        map[i][t] = map[t][i] = 1;
+        if(++cnt == M) return 0;
+    }
+    FOR(i,1,N){
+        if(cnt == M) return 0;
+        if(i == s) continue;
+        FOR(j,1,N){
+            if(map[i][j] ||  i == j || j == s) continue;
+            printf("%d %d\n",i,j);
+            map[i][j] = map[j][i] = true;
+            if(++cnt == M) return 0;
+        }
+    }
     return 0;
 }

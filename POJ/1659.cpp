@@ -59,51 +59,55 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 5000 + 5;
+const int MAXN = 10 + 5;
 
 struct Node{
-    int x,y;
-    double dist;bool used;
-}p[MAXN];
+    int du,pos;
 
-double cost(Node *a,Node *b){
-    return sqrt((double)(a->x - b->x) * (double)(a->x - b->x) + (double)(a->y - b->y) * (double)(a->y - b->y));
-}
+    bool operator < (const Node &other) const {
+        return du > other.du;
+    }
+}frog[MAXN];
 
-int N;
-#define MP std::make_pair
-#define P std::pair<int,Node *>
+int map[MAXN][MAXN];
 
-double prim(){
+inline void solve(){
+    int N;read(N);
     FOR(i,1,N){
-        p[i].dist = INT_MAX;
-        p[i].used = false;
+        read(frog[i].du);
+        frog[i].pos = i;
     }
-    std::priority_queue<P,std::vector<P>,std::greater<P> > q;
-    q.push(MP(0,&p[1]));p[1].dist = 0.0;
-    double ret = 0.0;
-    while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
-        if(v->used) continue;
-        v->used = true;
-        ret += v->dist;
-        FOR(i,1,N){
-            Node *vv = &p[i];
-            if(v == vv) continue;
-            double w = cost(v,vv);
-            if(vv->dist > w){
-                vv->dist = w;
-                q.push(MP(vv->dist,vv));
-            }
+    CLR(map,0);
+    FOR(i,1,N){
+        std::sort(frog + i,frog + N + 1);
+        if(frog[i].du > N-i+1){
+            puts("NO");
+            return;
         }
+        FOR(j,i+1,i+frog[i].du){
+            if(!frog[j].du){
+                puts("NO");
+                return;
+            }
+            frog[j].du--;
+            map[frog[i].pos][frog[j].pos] = map[frog[j].pos][frog[i].pos] = 1;
+        }
+        frog[i].du = 0;
     }
-    return ret;
+    puts("YES");
+    FOR(i,1,N){
+        FOR(j,1,N){
+            printf("%d ",map[i][j]);
+        }
+        puts("");
+    }
 }
 
 int main(){
-    read(N);
-    FOR(i,1,N) read(p[i].x),read(p[i].y);
-    printf("%.2f\n",prim());
+    int T;read(T);
+    while(T--){
+        solve();
+        puts("");
+    }
     return 0;
 }

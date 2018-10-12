@@ -59,51 +59,32 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 5000 + 5;
+const int MAXN = 100000 + 5;
 
-struct Node{
-    int x,y;
-    double dist;bool used;
-}p[MAXN];
+int f[MAXN][50],N,M;
 
-double cost(Node *a,Node *b){
-    return sqrt((double)(a->x - b->x) * (double)(a->x - b->x) + (double)(a->y - b->y) * (double)(a->y - b->y));
-}
-
-int N;
-#define MP std::make_pair
-#define P std::pair<int,Node *>
-
-double prim(){
-    FOR(i,1,N){
-        p[i].dist = INT_MAX;
-        p[i].used = false;
-    }
-    std::priority_queue<P,std::vector<P>,std::greater<P> > q;
-    q.push(MP(0,&p[1]));p[1].dist = 0.0;
-    double ret = 0.0;
-    while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
-        if(v->used) continue;
-        v->used = true;
-        ret += v->dist;
-        FOR(i,1,N){
-            Node *vv = &p[i];
-            if(v == vv) continue;
-            double w = cost(v,vv);
-            if(vv->dist > w){
-                vv->dist = w;
-                q.push(MP(vv->dist,vv));
-            }
+inline void init(){
+    float c = log2(MAXN);
+    FOR(j,1,21){
+        for(int i = 1;i+(1<<j)-1 <= N;i++){
+            f[i][j] = std::max(f[i][j-1],f[i+(1<<(j-1))][j-1]);
         }
     }
-    return ret;
+}
+
+inline int calc(int i,int j){
+    int c = log2(j-i+1);
+    return std::max(f[i][c],f[j-(1<<c)+1][c]);
 }
 
 int main(){
-    read(N);
-    FOR(i,1,N) read(p[i].x),read(p[i].y);
-    printf("%.2f\n",prim());
+    read(N);read(M);
+    FOR(i,1,N) read(f[i][0]);
+    init();
+    while(M--){
+        int x,y;
+        read(x);read(y);
+        printf("%d\n",calc(x,y));
+    }
     return 0;
 }

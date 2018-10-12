@@ -59,51 +59,37 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 5000 + 5;
+const int MAXN = 300000 + 5;
 
-struct Node{
-    int x,y;
-    double dist;bool used;
-}p[MAXN];
-
-double cost(Node *a,Node *b){
-    return sqrt((double)(a->x - b->x) * (double)(a->x - b->x) + (double)(a->y - b->y) * (double)(a->y - b->y));
-}
-
-int N;
-#define MP std::make_pair
-#define P std::pair<int,Node *>
-
-double prim(){
-    FOR(i,1,N){
-        p[i].dist = INT_MAX;
-        p[i].used = false;
-    }
-    std::priority_queue<P,std::vector<P>,std::greater<P> > q;
-    q.push(MP(0,&p[1]));p[1].dist = 0.0;
-    double ret = 0.0;
-    while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
-        if(v->used) continue;
-        v->used = true;
-        ret += v->dist;
-        FOR(i,1,N){
-            Node *vv = &p[i];
-            if(v == vv) continue;
-            double w = cost(v,vv);
-            if(vv->dist > w){
-                vv->dist = w;
-                q.push(MP(vv->dist,vv));
-            }
-        }
-    }
-    return ret;
-}
+std::set<int> S;
+int N,M;
+int ans[MAXN];
+std::vector<std::set<int>::iterator>v;
 
 int main(){
-    read(N);
-    FOR(i,1,N) read(p[i].x),read(p[i].y);
-    printf("%.2f\n",prim());
+    read(N);read(M);
+    FOR(i,1,N) S.insert(i);
+    FOR(i,1,M){
+        int l,r,x;read(l);read(r);read(x);
+        std::set<int>::iterator k = S.lower_bound(l);
+        v.clear();
+        for(std::set<int>::iterator it = k;*it <= r && it != S.end();it++){
+            if(*it == x) continue;
+            ans[*it] = x;
+            v.push_back(it);
+        }//DEBUG((int)v.size()-1);
+        FOR(i,0,(int)v.size()-1){
+           // DEBUG(*v[i]);DEBUG(i);
+            S.erase(v[i]);
+        }
+        // FOR(j,l,r){
+        //     if(j == x) continue;
+        //     if(S.count(j)){
+        //         S.erase(j);
+        //         ans[j] = x;
+        //     }
+        // }
+    }
+    FOR(i,1,N) printf("%d%c",ans[i],(i == N) ? '\n' : ' ');
     return 0;
 }

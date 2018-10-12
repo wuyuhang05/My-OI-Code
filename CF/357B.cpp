@@ -58,52 +58,41 @@ namespace fastIO{
     #undef BUF_SIZE 
 }; 
 using namespace fastIO;
+const int MAXN = 100000 + 5;
+int N,M;
 
-const int MAXN = 5000 + 5;
-
-struct Node{
-    int x,y;
-    double dist;bool used;
-}p[MAXN];
-
-double cost(Node *a,Node *b){
-    return sqrt((double)(a->x - b->x) * (double)(a->x - b->x) + (double)(a->y - b->y) * (double)(a->y - b->y));
-}
-
-int N;
-#define MP std::make_pair
-#define P std::pair<int,Node *>
-
-double prim(){
-    FOR(i,1,N){
-        p[i].dist = INT_MAX;
-        p[i].used = false;
-    }
-    std::priority_queue<P,std::vector<P>,std::greater<P> > q;
-    q.push(MP(0,&p[1]));p[1].dist = 0.0;
-    double ret = 0.0;
-    while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
-        if(v->used) continue;
-        v->used = true;
-        ret += v->dist;
-        FOR(i,1,N){
-            Node *vv = &p[i];
-            if(v == vv) continue;
-            double w = cost(v,vv);
-            if(vv->dist > w){
-                vv->dist = w;
-                q.push(MP(vv->dist,vv));
-            }
-        }
-    }
-    return ret;
-}
+int vis[MAXN];
+int a[MAXN][5];
+int ans[MAXN];
 
 int main(){
-    read(N);
-    FOR(i,1,N) read(p[i].x),read(p[i].y);
-    printf("%.2f\n",prim());
+    read(N);read(M);
+    FOR(i,1,M){
+        int cnt = 0;
+        FOR(j,1,3){
+            read(a[i][j]);
+            vis[a[i][j]]++;
+            if(vis[a[i][j]] > 1)
+                cnt = j;
+        }
+        if(!cnt){
+            ans[a[i][1]] = 1;
+            ans[a[i][2]] = 2;
+            ans[a[i][3]] = 3;
+        }
+        if(cnt == 1){
+            ans[a[i][2]] = ans[a[i][1]]%3+1;
+            ans[a[i][3]] = ans[a[i][2]]%3+1;
+        }
+        if(cnt == 2){
+            ans[a[i][3]] = ans[a[i][2]]%3+1;
+            ans[a[i][1]] = ans[a[i][3]]%3+1;
+        }
+        if(cnt == 3){
+            ans[a[i][1]] = ans[a[i][3]]%3+1;
+            ans[a[i][2]] = ans[a[i][1]]%3+1;
+        }
+    }
+    FOR(i,1,N) printf("%d%c",ans[i],(i == N) ? '\n' : ' ');
     return 0;
 }

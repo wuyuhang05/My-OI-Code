@@ -59,51 +59,59 @@ namespace fastIO{
 }; 
 using namespace fastIO;
 
-const int MAXN = 5000 + 5;
+const int MAXN = 100000 + 5;
 
 struct Node{
-    int x,y;
-    double dist;bool used;
-}p[MAXN];
+    struct Edge *firstEdge;
+    bool p,vis;
+}node[MAXN];
 
-double cost(Node *a,Node *b){
-    return sqrt((double)(a->x - b->x) * (double)(a->x - b->x) + (double)(a->y - b->y) * (double)(a->y - b->y));
-}
+struct Edge{
+    Node *s,*t;
+    int w;
+    Edge *next;
+}pool[(MAXN<<1)+1],*frog = pool;
 
-int N;
-#define MP std::make_pair
-#define P std::pair<int,Node *>
-
-double prim(){
-    FOR(i,1,N){
-        p[i].dist = INT_MAX;
-        p[i].used = false;
-    }
-    std::priority_queue<P,std::vector<P>,std::greater<P> > q;
-    q.push(MP(0,&p[1]));p[1].dist = 0.0;
-    double ret = 0.0;
-    while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
-        if(v->used) continue;
-        v->used = true;
-        ret += v->dist;
-        FOR(i,1,N){
-            Node *vv = &p[i];
-            if(v == vv) continue;
-            double w = cost(v,vv);
-            if(vv->dist > w){
-                vv->dist = w;
-                q.push(MP(vv->dist,vv));
-            }
-        }
-    }
+Edge *New(Node *s,Node *t,int w){
+    Edge *ret = ++frog;
+    ret->s = s;ret->t = t;ret->w = w;
+    ret->next = s->firstEdge;
     return ret;
 }
 
+inline void add(int u,int v,int w){
+    node[u].firstEdge = New(&node[u],&node[v],w);
+    node[v].firstEdge = New(&node[v],&node[u],w);
+}
+
+int N,K;
+LL ans;
+
+int dfs(Node *v){
+    v->vis = true;
+    LL t=0,ret=0,max=0;
+    for(Edge *e = v->firstEdge;e;e = e->next){
+        if(e->t->vis) continue;
+        t = std::min(dfs(e->t),e->w);
+        ret += t;max = std::max(max,t);
+    }
+    ans += ret;
+    if(v->p) return INT_MAX;
+    ans -= max;
+    return max;
+}
+
 int main(){
-    read(N);
-    FOR(i,1,N) read(p[i].x),read(p[i].y);
-    printf("%.2f\n",prim());
+    read(N);read(K);
+    FOR(i,1,K){
+        int x;read(x);
+        node[x].p = true;
+    }
+    FOR(i,1,N-1){
+        int x,y,z;read(x);read(y);read(z);
+        add(x,y,z);
+    }
+    dfs(&node[0]);
+    printf("%lld\n",ans);
     return 0;
 }
