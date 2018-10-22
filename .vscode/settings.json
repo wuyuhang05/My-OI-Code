@@ -39,6 +39,9 @@
         "cstring": "cpp",
         "cuchar": "cpp",
         "valarray": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "__mutex_base": "cpp",
+        "functional": "cpp",
+        "list": "cpp"
     }
 }
