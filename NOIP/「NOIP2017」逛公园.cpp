@@ -4,148 +4,116 @@
 #include <climits>
 #include <cstdio>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
 #include <cmath>
 #include <queue>
 #include <stack>
 #include <map>
 #include <set>
 
+#define Re register
 #define LL long long
-#define ULL unsigned long long
+#define U unsigned
+#define FOR(i,a,b) for(Re int i = a;i <= b;++i)
+#define ROF(i,a,b) for(Re int i = a;i >= b;--i)
+#define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
+#define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
+#define CLR(i,a) memset(i,a,sizeof(i))
+#define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
 const int MAXN = 100000 + 5;
 const int MAXM = 200000 + 5;
 
-int N,M,K,ha;
-int f[MAXN][1000];
-bool vis[MAXN][100];
-bool alive[MAXN];
+int N,M,K,P;
 
 struct Node{
     struct Edge *firstEdge;
     int dist,num;
     bool used;
-}node1[MAXN],node2[MAXN];
+}node[MAXN],rnode[MAXN];
 
 struct Edge{
     Node *s,*t;
     int w;
     Edge *next;
-}pool1[MAXM],pool2[MAXM],*frog1 = pool1,*frog2 = pool2;
+}pool[MAXM<<1],*frog = pool;
 
-Edge *New1(Node *s,Node *t,int w){
-    Edge *ret = ++frog1;
-    ret->s = s;ret->t = t;
-    ret->w = w;ret->next = s->firstEdge;
+Edge *New(Node *s,Node *t,int w){
+    Edge *ret = ++frog;
+    ret->s = s;ret->t = t;ret->w = w;
+    ret->next = s->firstEdge;
     return ret;
-}
-
-Edge *New2(Node *s,Node *t,int w){
-    Edge *ret = ++frog2;
-    ret->s = s;ret->t = t;
-    ret->w = w;ret->next = s->firstEdge;
-    return ret;
-}
-
-inline void Read(int &x){
-    char ch = getchar();
-    int flag = 1;x = 0;
-    for(;!isdigit(ch);ch = getchar())
-        if(ch == '-') flag = -1;
-    for(;isdigit(ch);ch = getchar())
-        x = (x << 1) + (x << 3) + (ch  ^ '0');
-    x *= flag;
 }
 
 inline void add(int u,int v,int w){
-    node1[u].firstEdge = New1(&node1[u],&node1[v],w);
-    node2[v].firstEdge = New2(&node2[v],&node2[u],w);
+    node[u].firstEdge = New(&node[u],&node[v],w);
+    rnode[v].firstEdge = New(&rnode[v],&rnode[u],w);
 }
 
-void dijkstra(){
-    std::priority_queue<std::pair<int,Node*>,std::vector<std::pair<int,Node*> >,std::greater<std::pair<int,Node *> > > q;
-    for(int i = 1;i <= N;i++){
-        node1[i].dist = INT_MAX;
-        node1[i].num = node2[i].num = i;
-        node1[i].used = false;
+#define P std::pair<int,Node *>
+#define MP std::make_pair
+
+inline void dij(){
+    std::priority_queue<P,std::vector<P>,std::greater<P> >q;
+    FOR(i,1,N){
+        node[i].num = rnode[i].num = i;
+        rnode[i].dist = INT_MAX;
+        rnode[i].used = false;
     }
-    node1[1].dist = 0;
-    node1[1].used = true;
-    q.push(std::make_pair(node1[1].dist,&node1[1]));
+    q.push(MP(rnode[N].dist=0,&rnode[N]));
     while(!q.empty()){
-        Node *v = q.top().second;
-        q.pop();
+        Node *v = q.top().second;q.pop();
+        if(v->used) continue;
+        v->used = true;
         for(Edge *e = v->firstEdge;e;e = e->next){
             if(e->t->dist > v->dist + e->w){
                 e->t->dist = v->dist + e->w;
-                if(!e->t->used){
-                    e->t->used = true;
-                    q.push(std::make_pair(e->t->dist,e->t));
-                }
+                q.push(MP(e->t->dist,e->t));
             }
         }
     }
 }
 
-void check(){
-    std::queue<Node *> q;
-    alive[N] = true;
-    q.push(&node2[N]);
-    while(!q.empty()){
-        Node *v = q.front();
-        q.pop();
-        for(Edge *e = v->firstEdge;e;e = e->next){
-            if(!alive[e->t->num]){
-                alive[e->t->num] =  true;
-                q.push(e->t);
-            }
-        }
-    }
-}
+int f[MAXN][100];
+int vis[MAXN][100];
+int ha;
 
 int dfs(Node *v,int k){
-    if(k < 0) return 0;
-    if(vis[v->num][k]) return INT_MIN;
-    if(f[v->num][k] != -1) return f[v->num][k];
+    if(vis[v->num][k]) return -1;
+    if(f[v->num][k]) return f[v->num][k];
     vis[v->num][k] = true;
-    int ret = 0;
-    if(v->num == N) ret++;
+    f[v->num][k] = (v->num == N) ? 1 : 0;
     for(Edge *e = v->firstEdge;e;e = e->next){
-        int delta = e->t->dist - v->dist;
-        if(!alive[e->t->num]) continue;
-        int w = dfs(e->t,k - e->w + delta);
-        if(w == INT_MIN) return INT_MIN;
-        else ret = (ret + w)%ha;
+        int t = rnode[e->t->num].dist+e->w-rnode[v->num].dist;
+        if(t <= k && t >= 0){
+            int res = dfs(e->t,k-t);
+            if(res == -1) return f[v->num][k] = -1;
+            f[v->num][k] = (f[v->num][k] + res)%ha;
+        }
     }
-    f[v->num][k] = ret % ha;
     vis[v->num][k] = false;
-    return ret;
+    return f[v->num][k];
+}
+
+inline void Solve(){
+    CLR(f,0);CLR(vis,false);
+    frog = pool;
+    scanf("%d%d%d%d",&N,&M,&K,&ha);
+    CLR(node,0);CLR(rnode,0);
+    FOR(i,1,M){
+        int u,v,w;
+        scanf("%d%d%d",&u,&v,&w);
+        add(u,v,w);
+    }
+    dij();
+    int ans = dfs(&node[1],K);
+    printf("%d\n",ans);
 }
 
 int main(){
-    int T;
-    Read(T);
-    while(T--){
-        Read(N);Read(M);Read(K);Read(ha);
-        memset(pool1,0,sizeof(pool1));
-        memset(pool2,0,sizeof(pool2));
-        memset(f,-1,sizeof(f));
-        memset(vis,false,sizeof(vis));
-        memset(alive,false,sizeof(alive));
-        for(int i = 1;i <= N;i++)
-            node1[i].firstEdge = node2[i].firstEdge = NULL;
-        frog1 = pool1;frog2 = pool2;
-        for(int u,v,w,i = 1;i <= M;i++){
-            Read(u);Read(v);Read(w);
-            add(u,v,w);
-        }
-        dijkstra();
-        check();
-        int ans = dfs(&node1[1],K);
-        printf("%d\n",(ans == INT_MIN) ? -1 : ans);
-    }
+    int T;scanf("%d",&T);
+    while(T--) Solve();
     return 0;
 }
-
-

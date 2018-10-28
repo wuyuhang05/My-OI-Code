@@ -48,5 +48,5 @@ int main(){
         FOR(j,from,i-from)
 			if(v[j][i-j] && str[j][i-j] == ch) v[j][i-j+1] = v[j+1][i-j] = 1;
     }
-    return 0;
+    retur 0;
 }
