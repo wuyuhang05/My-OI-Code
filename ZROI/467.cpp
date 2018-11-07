@@ -58,39 +58,84 @@ namespace fastIO{
 using namespace fastIO;
 
 const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
 
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
+int prime[MAXN],tot,d[MAXN];
+bool p[MAXN],vis[MAXN];
+int pos[MAXN];
+inline void pre(){
+	FOR(i,0,20) pos[1<<i] = i;
+	p[1] = true;
+	FOR(i,2,MAXN-1){
+		if(!p[i]){
+			prime[++tot] = i;d[i] = i;
+		}
+		for(int j = 1;j <= tot && i*prime[j] < MAXN;j++){
+			p[i*prime[j]] = 1;d[i*prime[j]] = prime[j];
+			if(!(i%prime[j])) break;
+		}
+	}
 }
 
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
-}
+int c[MAXN],z[MAXN],size; 
+int cnt[MAXN][21];
+int msk[MAXN]; 
+int opt,x,ans;
+#define lowbit(x) (x&-x)
+void dfs(int step,int gcd,int res){
+	if(step > size){
+		if(opt == 1) if(++cnt[gcd][res] == 1) msk[gcd] ^= 1<<res;
+		if(opt == 2) if(!--cnt[gcd][res]) msk[gcd] ^= 1<<res;
+		if(opt == 3) if(msk[gcd]) ans = std::min(ans,res+pos[lowbit(msk[gcd])]);
+//		if(opt == 3){
+//			DEBUG(res);
+//			DEBUG(msk[gcd]);DEBUG(res+pos[lowbit(msk[gcd])]);
+//			DEBUG(pos[lowbit(msk[gcd])]);DEBUG(lowbit(msk[gcd]));
+//		}
+		return;
+	}
+	FOR(i,0,c[step]){
+		dfs(step+1,gcd,res+c[step]-i);
+		gcd *= z[step];
+	}
+} 
 
+void fjprime(int x){
+	size = 0;
+	while(x > 1){
+		z[++size] = d[x];c[size] = 0;
+		while(!(x%z[size])) x /= z[size],++c[size];
+	}
+}
+//#define read(x) std::cin >> x
 int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
+	pre();
+	int Q;
+	read(Q);
+	while(Q--){
+		//int opt,x;
+		read(opt);read(x);
+		if((opt == 1 && vis[x]) || (opt == 2 && !vis[x])) continue;
+		fjprime(x);//DEBUG(size);
+		ans = INT_MAX;
+		dfs(1,1,0);
+		if(opt == 3) printf("%d\n",ans == INT_MAX ?-1 :ans);
+		else vis[x] = opt == 1 ?1 :0;
+	}
+	return 0;
 }
+/*
+12
+1 20
+1 15
+3 30
+1 30
+3 30
+2 10
+3 27
+1 15
+2 15
+2 20
+2 30
+3 5
+*/
+

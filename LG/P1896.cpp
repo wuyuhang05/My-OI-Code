@@ -57,40 +57,39 @@ namespace fastIO{
 };
 using namespace fastIO;
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
-
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
-}
-
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
-}
+const int MAXN = 9+1;
+#define lowbit(x) (x&-x)
+int status[(1<<MAXN)+1],cnt[(1<<MAXN)+1],size;
+/// status 合法的情况，cnt 情况有多少个二进制1 
+LL f[MAXN][MAXN*MAXN][(1<<MAXN)+1];
+int N,K;
 
 int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
+	read(N);read(K);
+	int MAX = (1<<N)-1;
+	FOR(i,0,MAX){
+		if(i & (i>>1)) continue;
+		status[++size] = i;
+		int x = i;
+		while(x){
+			x -= lowbit(x);
+			cnt[size]++;
+		}
+	}
+	FOR(i,1,size) f[1][cnt[i]][i] = 1;
+	FOR(i,2,N){
+		FOR(j,1,size){
+			FOR(k,1,size){
+				if((status[j]&status[k]) || (status[j]&status[k] << 1) || (status[j]&status[k] >> 1)) continue;
+				FOR(l,cnt[k],K){
+					f[i][l][k] += f[i-1][l-cnt[k]][j];
+				}
+			}
+		}
+	}
+	LL ans=0;
+	FOR(i,1,size) ans += f[N][K][i];
+	printf("%lld\n",ans);
+	return 0;
 }
+

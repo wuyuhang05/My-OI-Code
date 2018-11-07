@@ -1,3 +1,4 @@
+#pragma comment(linker, "/STACK:102400000,102400000")
 #include <algorithm>
 #include <iostream>
 #include <cstring>
@@ -57,40 +58,85 @@ namespace fastIO{
 };
 using namespace fastIO;
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
+const int MAXN = 100000+5;
+const int MAXM = 300000+5;
 
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
+struct Node{
+    struct Edge *firstEdge;
+    Node *fa;
+    int col;
+    bool vis;
+}node[MAXN];
+
+struct Edge{
+    Node *s,*t;
+    Edge *next;
+}pool[MAXM<<1],*frog = pool;
+
+Edge *New(Node *s,Node *t){
+    Edge *ret = ++frog;
+    ret->s = s;ret->t = t;
+    ret->next = s->firstEdge;
+    return ret;
 }
 
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
+inline void add(int u,int v){
+    node[u].firstEdge = New(&node[u],&node[v]);
+    node[v].firstEdge = New(&node[v],&node[u]);
+}
+
+int N,M,ts;
+bool odd,even;
+
+inline void prework(){
+    CLR(pool,0);frog = pool;
+    FOR(i,1,N) node[i].firstEdge = NULL,node[i].col = 0,node[i].fa = NULL,node[i].vis = false;
+    even = odd = false;
+}
+
+bool calc(Node *x,Node *y){
+    while(x != y){
+        if(!x) return false;
+        if(x->vis) return true;
+        x->vis = true;
+        x = x->fa;
+    }
+    return false;
+}
+
+void dfs(Node *v){
+    for(Edge *e = v->firstEdge;e;e = e->next){
+        if(e->t == v->fa) continue;
+        if(!e->t->col){
+            e->t->col = 3-v->col;
+            e->t->fa = v;
+            dfs(e->t);
+        }
+        else{
+            if(e->t->col == v->col){
+                odd = true;
+                if(calc(v,e->t)) even = true;
+            }
+            else even = true;
         }
     }
 }
 
+inline void Solve(){
+    read(N);read(M);
+    prework();
+    FOR(i,1,M){
+        int u,v;read(u);read(v);
+        add(u,v);
+    }
+    FOR(i,1,N) if(!node[i].col) node[i].col = 1,dfs(&node[i]);
+    puts(odd ? "YES" : "NO");
+    puts(even ? "YES" : "NO");
+}
+
 int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
+    int T;read(T);
+    while(T--) Solve();
     system("pause");
     return 0;
 }

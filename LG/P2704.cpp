@@ -55,42 +55,56 @@ namespace fastIO{
     #undef OUT_SIZE
     #undef BUF_SIZE
 };
-using namespace fastIO;
+const int MAXN = 100+5;
+const int MAXM = 10+2;
+const int MAXX = (1<<10)+2;
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
+int map[MAXN],N,M;
+char str[MAXN];
+int state[(1<<MAXM)+3],size;
+int f[MAXN][MAXX][MAXX];
+// ����ǰ i �У�i-1��״̬Ϊj��i��״̬Ϊk�����ڷŷ���
+int status[MAXX],cnt[MAXX]; 
 
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
-}
-
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
+inline int get(int x){
+	#define lowbit(x) (x&-x)
+	int res = 0;
+	while(x){
+		res++;
+		x -= lowbit(x);
+	}
+	return res;
+	#undef lowbit
 }
 
 int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
+	scanf("%d%d",&N,&M);
+	FOR(i,1,N){
+		scanf("%s",str+1);
+		FOR(j,1,M) map[i] = (map[i] << 1) + (str[j] == 'H' ? 1 : 0);
+	}
+	int MAX = (1<<M)-1;
+	FOR(i,0,MAX){
+		if((!((i<<1) & i)) && (!((i<<2) & i)) && (!((i>>1) & i)) && (!((i>>2) & i))){
+			state[++size] = i;
+			cnt[size] = get(i);
+			if(!(i&map[1])) f[1][0][size] = cnt[size];
+		}
+	}
+	FOR(i,1,size) FOR(j,1,size) if(!(state[i]&state[j]) && !(state[j]&map[2])) f[2][i][j] = std::max(f[2][i][j],f[1][0][i]+cnt[j]);
+	FOR(i,3,N){
+		FOR(j,1,size){ // now
+			if(map[i]&state[j]) continue;
+			FOR(k,1,size){ // i-1
+				if(state[j]&state[k]) continue;
+				FOR(l,1,size){// i-2
+					if(!(state[k]&state[l]) && !(state[l]&state[j])) f[i][k][j] = std::max(f[i][k][j],f[i-1][l][k]+cnt[j]);
+				}
+			}
+		}
+	}
+	int ans = 0;
+	FOR(i,1,size) FOR(j,1,size) ans = std::max(ans,f[N][i][j]);
+	printf("%d\n",ans);
+	return 0;
 }

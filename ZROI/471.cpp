@@ -57,40 +57,30 @@ namespace fastIO{
 };
 using namespace fastIO;
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
-
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
-}
-
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
-}
-
+const int MAXN = 500000+5;
+std::vector<int> v;
+int N,K,gcd;
+int a[MAXN];
+bool vis[1000000+7];
 int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
-}
+	freopen("math5.in","r",stdin); 
+	freopen(".out","w",stdout);
+	scanf("%d%d",&N,&K);
+	FOR(i,1,N) read(a[i]);
+	FOR(i,1,N) a[i] %= K;
+	gcd = a[1];
+	FOR(i,1,N) gcd = std::__gcd(gcd,a[i]);
+	int k = 0;
+	int round = K/std::__gcd(gcd,K);
+	FOR(i,1,round){
+		//if(vis[k]) break;
+		v.push_back(k);//vis[k] = true;
+		k = (k+gcd)%K; 
+	}
+	printf("%d\n",v.size());
+	std::sort(v.begin(),v.end()); 
+	FOR(i,0,v.size()-1) printf("%d ",v[i]);
+	puts("");
+	return 0;
+} 
+

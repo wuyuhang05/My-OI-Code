@@ -56,41 +56,75 @@ namespace fastIO{
     #undef BUF_SIZE
 };
 using namespace fastIO;
+#define int LL
+const int MAXN = 200000 + 5;
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
+struct Node{
+	struct Edge *firstEdge;
+	int val,depth;
+}node[MAXN];
 
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
+struct Edge{
+	Node *s,*t;
+	Edge *next;
+}pool[MAXN<<1],*frog = pool;
+
+Edge *New(Node *s,Node *t){
+	Edge *ret = ++frog;
+	ret->s = s;ret->t = t;
+	ret->next = s->firstEdge;
+	return ret;
 }
 
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
+inline void add(int u,int v){
+	node[u].firstEdge = New(&node[u],&node[v]);
+	node[v].firstEdge = New(&node[v],&node[u]); 
+}
+const int MAXM = (1ll<<18) +2323;
+int N,Q;
+int ans[MAXM];
+
+void dfs(Node *v,Node *fa=NULL){
+	ans[v->depth] ^= v->val;//DEBUG(v->depth);
+	for(Edge *e = v->firstEdge;e;e = e->next){
+		if(e->t == fa) continue;
+		e->t->depth = v->depth + 1;
+		dfs(e->t,v);
+	}
 }
 
-int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
+signed main(){
+	read(N);read(Q);
+	FOR(i,1,N-1){
+		int u,v;read(u);read(v);++u;++v;
+		add(u,v);
+	}
+	FOR(i,1,N) read(node[i].val);
+	dfs(&node[1]);
+	//FOR(i,1,N) DEBUG(ans[i]);
+	FOR(i,1,18){
+		FOR(j,0,(1ll<<18)-1){
+			if(!(j&(1ll<<(i-1))))
+				ans[j|(1<<(i-1))] ^= ans[j];
+		}
+	}
+	//FOR(i,1,N) DEBUG(ans[i]);
+	while(Q--){
+		int x;read(x);
+		--x;
+		int r = (1ll<<18)-1;
+		x &= r;r ^= x;
+		printf("%lld\n",ans[r]);
+	}
+	return 0;
 }
+/*
+4 3
+0 1
+1 2
+0 3
+1 5 8 7
+1
+2
+3
+*/

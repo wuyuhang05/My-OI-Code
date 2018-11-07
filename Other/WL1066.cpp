@@ -56,41 +56,30 @@ namespace fastIO{
     #undef BUF_SIZE
 };
 using namespace fastIO;
+#define int LL
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
+const int MAXN = 50+5;
+const int ha = 1000000007;
+int a[MAXN<<1],N;
+int f[MAXN<<1][MAXN<<2][MAXN<<2];
 
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
+int dfs(int step,int s1,int s2){
+	if(step == N+10){
+		return 1;
+	}
+	if(f[step][s1][s2] != -1) return f[step][s1][s2];
+	int k = std::min(s1,s2),ans=0;
+	ROF(i,k,0){
+		ans = (ans + dfs(step+1,s2-i,a[step+2]+i)%ha)%ha;
+	}
+	return f[step][s1][s2] = ans;
 }
 
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
+signed main(){
+	read(N);CLR(f,-1);
+	FOR(i,1,N) read(a[i]);
+	int ans = dfs(1,a[1],a[2]);
+	printf("%lld\n",ans);
+	return 0;
 }
 
-int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
-}

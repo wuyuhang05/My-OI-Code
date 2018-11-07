@@ -57,40 +57,56 @@ namespace fastIO{
 };
 using namespace fastIO;
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
+const int MAXN = 3;
+const int ha = 1e9+7;
+#define int LL
 
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
+struct Matrix{
+    int a[MAXN][MAXN];
+
+    inline void clear(){
+        CLR(a,0);
     }
-}
 
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
+    Matrix operator * (const Matrix &other) const {
+        Matrix res;res.clear();
+        FOR(i,0,2){
+            FOR(j,0,2){
+                FOR(k,0,2){
+                    res.a[i][j] += (this->a[i][k] * other.a[k][j]) % ha;
+                    res.a[i][j] %= ha;
+                }
+            }
         }
+        return res;
+    }
+
+    Matrix operator ^ (int k) const {
+        Matrix res,a;res.clear();
+        a = *this;
+        FOR(i,0,2) res.a[i][i] = 1;
+        while(k){
+            if(k & 1) res = res*a;
+            a = a*a;
+            k >>= 1;
+        }
+        return res;
+    }
+}p;
+
+inline void Solve(){
+    int N;read(N);p.clear();
+    p.a[0][2] = p.a[1][0] = p.a[2][1] = p.a[2][2] = 1;
+    if(N <= 3) puts("1");
+    else{
+        Matrix ans = p^(N-3);
+        printf("%lld\n",(ans.a[0][2]+ans.a[1][2]+ans.a[2][2])%ha);
     }
 }
 
-int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
+signed main(){
+    int T;read(T);
+    while(T--) Solve();
     system("pause");
     return 0;
 }

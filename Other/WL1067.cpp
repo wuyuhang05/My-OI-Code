@@ -58,39 +58,56 @@ namespace fastIO{
 using namespace fastIO;
 
 const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
 
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
-}
-
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
-}
+struct BIT{
+	#define lowbit(x) (x&-x)
+	static const int SIZE = MAXN<<1;
+	int tree[SIZE+20];
+	inline void add(int pos,int x){
+		while(pos <= SIZE){
+			tree[pos] ^= x;
+			pos += lowbit(pos);
+		}
+	}
+	inline int calc(int pos){
+		int ret = 0;
+		while(pos){
+			ret ^= tree[pos];
+			pos -= lowbit(pos);
+		}
+		return ret;
+	}
+	#undef lowbit
+}bit;
+#define MP std::make_pair
+int N,M;
+std::vector<std::pair<int,int> > q[MAXN];
+int a[MAXN];
+std::map<int,int> last;
+int pre[MAXN],ans[MAXN];
+int sum[MAXN];
 
 int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
+	read(N);read(M);
+	FOR(i,1,N){
+		read(a[i]);
+		pre[i] = last[a[i]];
+		last[a[i]] = i;
+		sum[i] = sum[i-1]^a[i];
+	}
+	FOR(i,1,M){
+		int l,r;read(l);read(r);
+		q[r].push_back(MP(l,i));
+	}
+	FOR(i,1,N){
+		if(pre[i]) bit.add(pre[i],a[i]);
+		bit.add(i,a[i]);
+		FOR(j,0,(int)q[i].size()-1){
+			int x = bit.calc(i)^bit.calc(q[i][j].first-1);
+			ans[q[i][j].second] = x^sum[i]^sum[q[i][j].first-1];
+		}
+	}
+	FOR(i,1,M) printf("%d\n",ans[i]);
+	return 0;
 }
+

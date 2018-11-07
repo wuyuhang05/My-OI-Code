@@ -6,7 +6,7 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
-#include <cmath>
+//#include <cmath>
 #include <queue>
 #include <stack>
 #include <map>
@@ -56,41 +56,53 @@ namespace fastIO{
     #undef BUF_SIZE
 };
 using namespace fastIO;
-
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
-
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
+#define int LL
+const int MAXN = 12 + 5;
+const int MAXX = (1<<12)+5;
+int map[MAXN][MAXN];
+int N,M;
+int v[MAXX],pos[MAXX];
+int log[MAXX],g[MAXX],state[MAXX];
+int f[MAXN][MAXX];
+#define lowbit(x) (x&-x)
+signed main(){
+	read(N);read(M);
+	FOR(i,1,N) FOR(j,1,N) map[i][j] = INT_MAX;
+	FOR(i,1,M){
+		int u,v,w;read(u);read(v);read(w);
+		map[u][v] = map[v][u] = std::min(map[u][v],w);
+	}
+	int MAX = (1<<N)-1;
+	CLR(f,0x3f);
+	FOR(i,0,N) f[1][1<<i] = 0;
+	FOR(i,0,N) log[1<<i]=i;
+	FOR(i,1,N){
+		FOR(j,0,MAX){
+			int cnt = 0;
+			FOR(k,1,N){
+				if(!(j&(1<<(k-1)))){
+					cnt++;
+					v[cnt] = INT_MAX;
+					pos[cnt] = (1<<(k-1));
+					int t = j;
+					while(t){
+						int e = log[lowbit(t)]+1;//DEBUG(e);
+						if(map[k][e] < INT_MAX) v[cnt] = std::min(v[cnt],map[k][e]*i);
+						t -= lowbit(t);
+					}
+				}
+			}
+			int size = (1<<cnt)-1;
+			FOR(k,1,size){
+				g[k] = g[k-lowbit(k)]+v[log[lowbit(k)]+1];
+				state[k] = state[k-lowbit(k)] | pos[log[lowbit(k)]+1];
+				f[i+1][j|state[k]] = std::min(f[i+1][j|state[k]],f[i][j]+g[k]);
+			}
+		}
+	}
+	int ans = INT_MAX;
+	FOR(i,1,N) ans = std::min(ans,f[i][MAX]);
+	printf("%lld\n",ans);
+	return 0;
 }
 
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
-}
-
-int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
-}

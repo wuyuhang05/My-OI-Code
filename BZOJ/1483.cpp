@@ -58,39 +58,43 @@ namespace fastIO{
 using namespace fastIO;
 
 const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
+int a[MAXN];
+int f[MAXN];
+std::set<int> s[MAXN]; 
 
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
-}
+int N,M;
+int ans; 
 
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
+inline void merge(int x,int y){
+	for(std::set<int>::iterator it = s[x].begin();it != s[x].end();it++){
+		if(a[*it-1] == y) ans--;
+		if(a[*it+1] == y) ans--;
+		s[y].insert(*it);
+	}
+	for(std::set<int>::iterator it = s[x].begin();it != s[x].end();it++)
+		a[*it] = y;
+	s[x].clear();
 }
 
 int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
+	read(N);read(M);
+	FOR(i,1,N){
+		read(a[i]);
+		if(a[i] != a[i-1]) ans++;
+		f[a[i]] = a[i];
+		s[a[i]].insert(i);
+	}
+	FOR(i,1,M){
+		int opt;read(opt);
+		if(opt == 1){
+			int x,y;read(x);read(y);
+			if(x == y) continue;
+			if(s[f[x]].size() > s[f[y]].size()) std::swap(f[x],f[y]);
+			merge(f[x],f[y]);
+		}
+		if(opt == 2){
+			printf("%d\n",ans);
+		}
+	}
+	return 0;
 }

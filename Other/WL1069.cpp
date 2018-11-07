@@ -57,40 +57,90 @@ namespace fastIO{
 };
 using namespace fastIO;
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
+const int MAXN = 300000+5;
 
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
+struct SegmentTree *New(int ,int ,SegmentTree *,SegmentTree *);
+
+struct SegmentTree{
+	int l,r,sum,tag;
+	SegmentTree *lc,*rc;
+	
+	static SegmentTree *build(int l,int r){
+		int mid = (l + r) >> 1;
+		return (l == r) ? New(l,r,NULL,NULL) : New(l,r,build(l,mid),build(mid+1,r));
+	}
+	
+	inline void pushup(){
+		sum = lc->sum + rc->sum; 
+	}
+	
+	inline void clear(){
+		sum = 0;tag = 1;
+	}
+	
+	inline void pushdown(){
+		if(tag){
+			lc->clear();
+			rc->clear();
+			tag = 0;
+		}
+	}
+	
+	void modify(int L,int R){
+		if(L == l && R == r){
+			clear();
+			return;
+		} 
+		pushdown();
+		int mid = (l + r) >> 1;
+		if(R <= mid) lc->modify(L,R);
+		else if(L > mid) rc->modify(L,R);
+		else lc->modify(L,mid),rc->modify(mid+1,R);
+		pushup(); 
+	} 
+	
+	void update(int pos){
+		if(l == r){
+			sum = 1;return;
+		}
+		int mid = (l + r) >> 1;
+		if(pos <= mid) lc->update(pos);
+		else rc->update(pos);
+		pushup();
+	}
+}pool[MAXN<<1],*frog = pool,*segt;
+
+SegmentTree *New(int l,int r,SegmentTree *lc,SegmentTree *rc){
+	SegmentTree *ret = ++frog;
+	ret->l = l;ret->r = r;ret->lc = lc;ret->rc = rc;
+	ret->sum = ret->tag = 0;
+	return ret; 
 }
 
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
-}
+int N,Q,cnt;
+std::vector<int> p[MAXN];
 
 int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
+	read(N);read(Q);
+	segt = SegmentTree::build(1,Q);
+	while(Q--){
+		int opt,x;read(opt);read(x);
+		if(!(opt-1)){ // 1
+			p[x].push_back(++cnt);
+			segt->update(cnt);
+		}
+		else if(opt&1){ // 3
+			segt->modify(1,x);
+		}
+		else{ // 2
+			FOR(i,0,(int)p[x].size()-1){
+				//DEBUG(p[x][i]);
+				segt->modify(p[x][i],p[x][i]);
+			}
+			p[x].clear();
+		}
+		printf("%d\n",segt->sum);
+	}
+	return 0;
 }
+

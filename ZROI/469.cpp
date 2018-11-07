@@ -57,40 +57,34 @@ namespace fastIO{
 };
 using namespace fastIO;
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
-
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
-    }
-}
-
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
-}
+const int MAXN = 14+2;
+char str[(1<<MAXN)+3]; 
+int N;
+int ans[(1<<MAXN)+3];
+int f[(1<<MAXN)+3];
+int check[(1<<MAXN)+3];
 
 int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
-    return 0;
+	scanf("%d%s",&N,str);
+	int MAX = (1<<N)-1;
+	FOR(i,0,MAX){
+		ans[i] = N;
+		f[i] = str[i]-'0';
+	}
+	FOR(i,0,MAX){
+		CLR(check,-1);
+		FOR(j,0,MAX){
+			if(check[j&i] == -1) check[j&i] = f
+			[j];
+			else if(check[j&i] != f[j]) check[j&i] = 2;
+		}
+		int cnt = __builtin_popcount(i);
+		FOR(j,0,MAX){
+			if(check[j&i] == f[j]) ans[j] = std::min(ans[j],cnt);
+		}
+	}
+	FOR(i,0,MAX) printf("%d ",ans[i]);
+	puts("");
+	return 0;
 }
+

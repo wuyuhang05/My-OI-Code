@@ -56,41 +56,34 @@ namespace fastIO{
     #undef BUF_SIZE
 };
 using namespace fastIO;
-
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
-
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
+#define int LL
+void ex_gcd(int a,int b,int &x,int &y){
+    if(b == 0){
+        x = 1;y = 0;
+        return;
     }
+    ex_gcd(b,a%b,x,y);
+    int t = x;x = y;y = t-(a/b)*y;
 }
 
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
+signed main(){
+    LL a,b,x=0,y=0;
+    read(a);read(b);
+    if(a > b) std::swap(a,b);
+    ex_gcd(a,b,x,y);
+    if(x > 0){
+        std::swap(a,b);
+        std::swap(x,y);
     }
-}
-
-int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
-    system("pause");
+    LL t = (-x)/b;
+    x = x+t*b;
+    y = y-t*a;
+    while(x < 0) x+=b,y-=a;
+    while(x > 0) x-=b,y+=a;
+    LL ans;
+    LL xx = x+b;
+    ans = a*(xx-1)+b*(y-1);
+    printf("%lld\n",ans-1);
+    //system("pause");
     return 0;
 }

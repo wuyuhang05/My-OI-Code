@@ -56,41 +56,28 @@ namespace fastIO{
     #undef BUF_SIZE
 };
 using namespace fastIO;
+#define int LL
+const int MAXN = 100000+5;
+int a[MAXN],N;
+int ans,pre=1,sum;
+// ceil(a[i]/2) ~ a[i]
 
-const int MAXN = 1000000+5;
-char str1[MAXN],str2[MAXN];
-int next[MAXN];
-std::vector<int> ans;
-
-inline void init(char *str){
-    int len,j=0;
-    len = strlen(str+1);
-    FOR(i,2,len){
-        while(j && str[i] != str[j+1]) j = next[j];
-        if(str[i] == str[j+1]) j++;
-        next[i] = j;
+signed main(){
+    read(N);
+    FOR(i,1,N) read(a[i]),sum += a[i];
+    std::sort(a+1,a+N+1);
+    FOR(i,1,N){
+        int t = ceil((1.0*a[i])/2.0);
+        //DEBUG(t);DEBUG(pre);
+        if(t > pre) ans += t-pre;
+        pre += a[i];
     }
-}
-
-inline void kmp(char *a,char *b){ //next->b;
-    int len1 = strlen(a+1),len2 = strlen(b+1),j=0;
-    FOR(i,1,len1){
-        while(j && a[i] != b[j+1]) j = next[j];
-        if(a[i] == b[j+1]) j++;
-        if(j == len2){
-            ans.push_back(i-len2+1);
-            j = next[j];
-        }
-    }
-}
-
-int main(){
-    scanf("%s%s",str1+1,str2+1);
-    init(str2);
-    kmp(str1,str2);
-    int len = strlen(str2+1);
-    FOR(i,0,(int)ans.size()-1) printf("%d\n",ans[i]);
-    FOR(i,1,len) printf("%d%c",next[i],(i == len) ? '\n' : ' ');
+    printf("%lld\n",sum-ans);
     system("pause");
     return 0;
 }
+/*
+95
+97 88 93 95 87 99 88 96 90 96 89 90 11 1 89 94 95 99 96 94 93 94 89 89 100 99 87 89 95 89 87 94 93 93 92 100 98 91 93 91 88 98 87 92 94 98 10 87 87 12 90 100 97 93 87 91 88 87 88 91 87 96 94 96 96 93 1 100 94 96 89 1 100 100 97 89 98 90 97 89 1 92 1 89 98 87 88 90 95 95 96 94 98 88 93
+ans: 8111
+*/
