@@ -42,6 +42,7 @@
         "random": "cpp",
         "__mutex_base": "cpp",
         "functional": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "iostream": "cpp"
     }
 }
