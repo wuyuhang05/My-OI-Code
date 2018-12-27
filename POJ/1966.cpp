@@ -1,7 +1,8 @@
 #include <algorithm>
 #include <iostream>
 #include <cstring>
-#include <climits>
+//#include <climits>
+#define INT_MAX 2147483645
 #include <cstdio>
 #include <vector>
 #include <cstdlib>
@@ -22,41 +23,41 @@
 #define CLR(i,a) memset(i,a,sizeof(i))
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
-
-const int MAXN = 500+5;
-const int MAXM = MAXN*MAXN;
+#define int LL
+const int MAXN = 1000+5;
+const int MAXM = 20000+5;
 
 struct Node{
     struct Edge *first,*cur;
-    int level,num;        
+    int level,num;
 }node[MAXN];
 
 struct Edge{
     Node *s,*t;
-    int cap,flow;
     Edge *next,*rev;
+    int cap,flow;
 }pool[MAXM<<1],*frog = pool;
 
 Edge *New(Node *s,Node *t,int cap){
-    Edge *ret = frog;
-    *ret = (Edge){s,t,cap,0,s->first,NULL};
-    frog++;
+    Edge *ret = ++frog;
+    *ret = (Edge){s,t,s->first,NULL,cap,0};
     return ret;
 }
 
 inline void add(int u,int v,int cap){
+    // printf("%d %d %d\n",u,v,cap);
     node[u].first = New(&node[u],&node[v],cap);
     node[v].first = New(&node[v],&node[u],0);
     node[u].first->rev = node[v].first;
     node[v].first->rev = node[u].first;
 }
 
-int N,S,T;
+int S,T,N;
 
-inline bool bfs(Node *s,Node *t){
+bool bfs(Node *s,Node *t){
     FOR(i,0,N){
         node[i].cur = node[i].first;
-        node[i].level = 0;
+        node[i].level = 0;node[i].num = i;
     }
     std::queue<Node *> q;q.push(s);
     s->level = 1;
@@ -88,8 +89,9 @@ int dfs(Node *v,Node *t,int limit=INT_MAX){
     return 0;
 }
 
-inline int dinic(){
-    int ans = 0,flow;
+int dinic(){
+    int flow,ans=0;
+    for(Edge *e = pool;e != frog+1;e++) e->flow = 0;
     while(bfs(&node[S],&node[T])){
         while((flow = dfs(&node[S],&node[T]))){
             ans += flow;
@@ -98,74 +100,46 @@ inline int dinic(){
     return ans;
 }
 
-int n,m,a,b,mid;
-
 inline void init(){
-    CLR(node,0);CLR(pool,0);frog = pool;
-    FOR(i,0,MAXN-1) node[i].num = i;
+    CLR(node,0);frog = pool;
 }
+
+int n,m;
 
 inline void Solve(){
     init();
-    scanf("%d%d%d%d%d",&n,&m,&a,&b,&mid);
-    S = 0,T = n*2+1;N = T;
-    add(S,mid,2);
-    FOR(i,1,n){
-        if(i == mid){
-            add(i,i+n,2);
-            continue;
-        }
-        add(i,i+n,1);
-        if(i == a || i == b) add(i+n,T,1);
-    }
     FOR(i,1,m){
-        int u,v;scanf("%d%d",&u,&v);
-        add(u+n,v,INT_MAX);
-        add(v+n,u,INT_MAX);
+        int u,v;
+        scanf(" (%lld,%lld)",&u,&v);//u++;v++;
+        add(u+n,v,INT_MAX);add(v+n,u,INT_MAX);
     }
-    dinic();
-    std::vector<int> ans;
-    int v = a;
-    while(true){
-        if(v <= n && v >= 1) ans.push_back(v);
-        int pos = -1;
-        for(Edge *e = pool;e != frog;e++){
-            // DEBUG(e);
-            if(e->t->num == v)
-                if(e->rev->cap - e->rev->flow > 0){
-                    pos = e->s->num;
-                    break;
-                }
-        }
-        if(pos == S) break;
-        v = pos;
+    FOR(i,0,n) add(i,i+n,1);
+    S = n;N = (n<<1);
+    int ans = n;
+    FOR(i,1,n-1){
+        T = i;//DEBUG(ans);
+        ans = std::min(ans,dinic());
     }
-    v = b;std::vector<int> ans2;
-    while(true){
-        if(v <= n && v >= 1) ans2.push_back(v);
-        int pos = -1;// DEBUG(v);
-        for(Edge *e = pool;e != frog;e++){
-            // DEBUG(e->t->num);
-            if(e->t->num == v){
-                // DEBUG(e->rev->cap);DEBUG(e->rev->flow);
-                if(e->rev->cap - e->rev->flow > 0){
-                    pos = e->s->num;
-                    break;
-                }
-            }
-        }
-        if(pos == mid) break;
-        v = pos;
-        //if(v == -1) break;
-    }
-    int cnt = 0;
-    FOR(i,0,(int)ans.size()-1) printf("%d ",ans[i]); 
-    ROF(i,(int)ans2.size()-1,0) printf("%d ",ans2[i]);
-    puts("");
+    printf("%lld\n",ans);
 }
+/*
+1 2
+1 3
+2 3
+*/
 
-int main(){
-    int T;scanf("%d",&T);
-    while(T--) Solve();
+signed main(){
+    while(~scanf("%lld%lld",&n,&m)) Solve();
     return 0;
 }
+/*
+1 4 1
+2 5 1
+3 6 1
+4 2 100000000
+5 1 100000000
+4 3 100000000
+6 1 100000000
+5 3 100000000
+6 2 100000000
+*/

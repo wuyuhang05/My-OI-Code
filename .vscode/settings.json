@@ -43,6 +43,7 @@
         "__mutex_base": "cpp",
         "functional": "cpp",
         "list": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "unordered_map": "cpp"
     }
 }
