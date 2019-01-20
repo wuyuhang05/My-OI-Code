@@ -23,10 +23,14 @@
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-struct Seg{
-    
-}
+const int MAXN = 100+5;
+const int MAXM = 100000+5;
+
+struct Edge{
+    int u,v,w;
+}e[MAXM];
 
 int main(){
+
     return 0;
 }

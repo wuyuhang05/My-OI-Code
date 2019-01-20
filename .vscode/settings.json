@@ -45,6 +45,7 @@
         "list": "cpp",
         "iostream": "cpp",
         "unordered_map": "cpp",
-        "cfenv": "cpp"
+        "cfenv": "cpp",
+        "cmath": "cpp"
     }
 }

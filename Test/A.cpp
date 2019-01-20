@@ -23,10 +23,6 @@
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-struct Seg{
-    
-}
-
 int main(){
     return 0;
 }
