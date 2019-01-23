@@ -23,20 +23,72 @@
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 100000+5;
-int N,a[MAXN];
-double x;
+const int MAXN = 1000000 + 5;
+const int MAXV = 5000000 + 5;
+
+bool vis[MAXV],in[MAXN];
+int prime[MAXV],cnt;
+int d[MAXV];
+int N;
+int p[MAXN],tail;
+int num[MAXN];
+
+inline void pre(){
+    vis[0] = vis[1] = true;
+    FOR(i,2,MAXV){
+        if(!vis[i]) prime[++cnt] = i,d[i] = i;
+        for(int j = 1;j <= cnt && 1ll * i * prime[j] <= MAXV;j++){
+            vis[i*prime[j]] = 1;
+            d[i*prime[j]] = prime[j];
+            if(!(i%prime[j])) break;
+        }
+    }
+}
 
 int main(){
-    scanf("%d%lf",&N,&x);
-    FOR(i,1,N) scanf("%d",a+i);
-    std::sort(a+1,a+N+1);
-    int i = 1;
-    while(i <= N){
-        while(a[i] <= x && i <= N) i++;
-        if(i > N) break;
-        x = (x+1.0*a[i])*0.5;i++;
+    pre();
+    scanf("%d",&N);DEBUG(N);int ans = 0;
+    while(N--){
+        int opt,x;scanf("%d%d",&opt,&x);
+        //DEBUG(opt);DEBUG(x);DEBUG(N);
+        if((opt == 1 && in[x]) || (opt == 2 && !in[x])) continue;
+        if(opt == 3){
+            printf("Ans: %d\n",ans);
+            continue;
+        }
+        int w = x,v;tail = 0;
+        while(d[w] > 1){
+            p[tail++] = v = d[w];
+            while(!(w % v)) w /= v;
+        }
+        if(opt == 2){
+            DEBUG((1<<tail)-1);
+            FOR(S,0,(1 << tail)-1){
+                int cnt = 0,res = 1;
+                FOR(i,0,tail-1){
+                    if(S & (1 << i)){
+                        cnt++;res *= p[i];
+                    }
+                }
+                num[res]--;//DEBUG(cnt);DEBUG(num[res]);DEBUG(-num[res]);
+                ans += (cnt & 1) ? num[res] : -num[res];
+                //DEBUG(num);
+                //DEBUG(ans);
+            }
+        }
+        else if(opt == 1){
+            FOR(S,0,(1 << tail)-1){
+                int cnt = 0,res = 1;
+                FOR(i,0,tail-1){
+                    if((1 << i) & S){
+                        cnt++;res *= p[i];
+                    }
+                }
+                ans += (cnt & 1) ? -num[res] : num[res];
+                num[res]++;
+            }
+        }
+        in[x]^=1;
     }
-    printf("%.3f\n",x);
     return 0;
 }
