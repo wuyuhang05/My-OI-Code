@@ -27,11 +27,11 @@
 #define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 10000+5;
+const int MAXN = 200000+5;
 
-int ch[MAXN][2],tag[MAXN],f[MAXN];
+int ch[MAXN][2],tag[MAXN],size[MAXN],val[MAXN],f[MAXN];
 
-inline bool nroot(int x){
+bool nroot(int x){
     return ch[f[x]][0] == x || ch[f[x]][1] == x;
 }
 
@@ -47,32 +47,37 @@ inline void pushdown(int x){
     }
 }
 
+inline void pushup(int x){
+    size[x] = 1;
+    if(lc) size[x] += size[lc];
+    if(rc) size[x] += size[rc];
+}
+
 inline void rotate(int x){
-    int y = f[x],z = f[y],k = ch[y][1] == x,w = ch[x][!k];
-    if(nroot(y)) ch[z][ch[z][1] == y] = x;
+    int y = f[x],z = f[y],k = ch[y][1]==x,w = ch[x][!k];
+    if(nroot(y)) ch[z][ch[z][1]==y] = x;
     ch[x][!k] = y;ch[y][k] = w;
     if(w) f[w] = y;
     f[y] = x;f[x] = z;
-    // pushup(y);
+    pushup(y);
 }
 
 int st[MAXN];
-
 inline void splay(int x){
     int y = x,z;st[z = 1] = y;
     while(nroot(y)) st[++z] = y = f[y];
     while(z) pushdown(st[z--]);
     while(nroot(x)){
         y = f[x];z = f[y];
-        if(nroot(y)) rotate((x == ch[y][0])^(y == ch[z][0]) ? x : y);
+        if(nroot(y)) rotate((ch[y][0]==x)^(ch[z][0]==y) ? x : y);
         rotate(x);
     }
-    // pushup(x);
+    pushup(x);
 }
 
 inline void access(int x){
     for(int y = 0;x;x = f[y = x]){
-        splay(x);rc = y;// pushup(x);
+        splay(x);rc = y;pushup(x);
     }
 }
 
@@ -92,30 +97,35 @@ inline void link(int x,int y){
     if(findroot(y) != x) f[x] = y;
 }
 
-inline void split(int x,int y){
-    makeroot(x);access(y);splay(y);
-}
-
 inline void cut(int x,int y){
-    split(x,y);
-    f[x] = ch[y][0] = 0;
+    makeroot(x);access(y);splay(y);
+    f[x] = ch[y][0] = 0;pushup(y);
 }
 
-int N,M;
-char str[sizeof("Destroy")+20];
+inline int calc(int x,int y){
+    makeroot(x);access(y);splay(y);
+    return size[y];
+}
 
 int main(){
-    scanf("%d%d",&N,&M);
+    int N,M;scanf("%d",&N);
+    FOR(i,1,N+1) size[i] = 1;
+    int T = N+1;
+    FOR(i,1,N){
+        scanf("%d",val+i);
+        if(i+val[i] <= N) link(i,i+val[i]);
+        else link(i,T);
+    }
+    scanf("%d",&M);
     while(M--){
-        int x,y;scanf("%s%d%d",str+1,&x,&y);
-        if(str[1] == 'Q'){
-            puts(findroot(y) == findroot(x) ? "Yes" : "No");
+        int opt,x,y;scanf("%d%d",&opt,&x);x++;
+        if(opt == 1){
+            printf("%d\n",calc(x,T)-1);
         }
-        if(str[1] == 'C'){
-            link(x,y);
-        }
-        if(str[1] == 'D'){
-            cut(x,y);
+        else{
+            scanf("%d",&y);cut(x,x+val[x]<=N?x+val[x]:T);
+            link(x,x+y<=N?x+y:T);
+            val[x] = y;
         }
     }
     return 0;

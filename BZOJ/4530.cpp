@@ -27,23 +27,26 @@
 #define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 10000+5;
-
-int ch[MAXN][2],tag[MAXN],f[MAXN];
+const int MAXN = 100000+5;
+int ch[MAXN][2],f[MAXN],son[MAXN],size[MAXN],rev[MAXN];
 
 inline bool nroot(int x){
     return ch[f[x]][0] == x || ch[f[x]][1] == x;
 }
 
+inline void pushup(int x){
+    size[x] = size[lc] + size[rc] + son[x] + 1;
+}
+
 inline void reverse(int x){
-    std::swap(lc,rc);tag[x] ^= 1;
+    std::swap(lc,rc);rev[x] ^= 1;
 }
 
 inline void pushdown(int x){
-    if(tag[x]){
+    if(rev[x]){
         if(lc) reverse(lc);
         if(rc) reverse(rc);
-        tag[x] = 0;
+        rev[x] = 0;
     }
 }
 
@@ -53,7 +56,7 @@ inline void rotate(int x){
     ch[x][!k] = y;ch[y][k] = w;
     if(w) f[w] = y;
     f[y] = x;f[x] = z;
-    // pushup(y);
+    pushup(y);
 }
 
 int st[MAXN];
@@ -63,16 +66,17 @@ inline void splay(int x){
     while(nroot(y)) st[++z] = y = f[y];
     while(z) pushdown(st[z--]);
     while(nroot(x)){
-        y = f[x];z = f[y];
-        if(nroot(y)) rotate((x == ch[y][0])^(y == ch[z][0]) ? x : y);
+        y = f[x],z = f[y];
+        if(nroot(y)) rotate((ch[y][0] == x) ^ (ch[z][0] == y) ? x : y);
         rotate(x);
     }
-    // pushup(x);
+    pushup(x);
 }
 
 inline void access(int x){
     for(int y = 0;x;x = f[y = x]){
-        splay(x);rc = y;// pushup(x);
+        splay(x);son[x] += size[rc] - size[y];
+        rc = y;pushup(x);
     }
 }
 
@@ -80,42 +84,22 @@ inline void makeroot(int x){
     access(x);splay(x);reverse(x);
 }
 
-inline int findroot(int x){
-    access(x);splay(x);
-    while(lc) pushdown(x),x = lc;
-    splay(x);
-    return x;
-}
-
 inline void link(int x,int y){
-    makeroot(x);
-    if(findroot(y) != x) f[x] = y;
+    makeroot(x);makeroot(y);f[x] = y;
+    son[y] += size[x];pushup(y);
 }
-
-inline void split(int x,int y){
-    makeroot(x);access(y);splay(y);
-}
-
-inline void cut(int x,int y){
-    split(x,y);
-    f[x] = ch[y][0] = 0;
-}
-
-int N,M;
-char str[sizeof("Destroy")+20];
 
 int main(){
-    scanf("%d%d",&N,&M);
-    while(M--){
-        int x,y;scanf("%s%d%d",str+1,&x,&y);
-        if(str[1] == 'Q'){
-            puts(findroot(y) == findroot(x) ? "Yes" : "No");
-        }
-        if(str[1] == 'C'){
+    int N,M;scanf("%d%d",&N,&M);
+    FOR(i,1,M){
+        char str[20];int x,y;
+        scanf("%s%d%d",str+1,&x,&y);
+        if(str[1] == 'A'){
             link(x,y);
         }
-        if(str[1] == 'D'){
-            cut(x,y);
+        if(str[1] == 'Q'){
+            makeroot(x);makeroot(y);
+            printf("%d\n",size[x]*(size[y]-size[x]));
         }
     }
     return 0;

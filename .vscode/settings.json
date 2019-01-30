@@ -46,6 +46,22 @@
         "iostream": "cpp",
         "unordered_map": "cpp",
         "cfenv": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "__debug": "cpp",
+        "__threading_support": "cpp",
+        "__tuple": "cpp",
+        "atomic": "cpp",
+        "cctype": "cpp",
+        "cstdarg": "cpp",
+        "cstdint": "cpp",
+        "cstdlib": "cpp",
+        "ctime": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "iosfwd": "cpp",
+        "mutex": "cpp",
+        "ostream": "cpp",
+        "streambuf": "cpp",
+        "system_error": "cpp"
     }
 }
