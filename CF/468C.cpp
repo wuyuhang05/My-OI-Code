@@ -23,14 +23,12 @@
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-int N;
-
-inline void qpow(int a,int n){
-    
-}
+LL l,r,mod,inf=1e18;
 
 int main(){
-    scanf("%d",&N);
-    
+    scanf("%lld",&mod);
+    l = mod-inf%mod*9%mod*9%mod;
+    r = l+inf-1;
+    printf("%lld %lld\n",l,r);
     return 0;
 }

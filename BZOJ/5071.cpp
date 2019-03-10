@@ -27,28 +27,24 @@
 #define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 1e7 + 5;
-const int ha = 1000000;
+using namespace std;
 
-int T,A,S,B;
-int a[MAXN],f[2][MAXN],now;
+const int MAXN = 1000000+5;
+int a[MAXN],N,t[MAXN];
+int c1[MAXN],c2[MAXN];
+
+inline void Solve(){
+    scanf("%d",&N);
+    for(int i = 1;i <= N;i++) scanf("%d",a+i),a[i] += a[i-1];
+    for(int i = 1;i <= N;i++) scanf("%d",t+i),t[i] += t[i-1];
+    sort(a+1,a+N+1);sort(t+1,t+N+1);
+    for(int i = 1;i <= N;i++) if(a[i] != t[i]){printf("NO\n");return;}
+    printf("YES\n");
+//    }
+}
 
 int main(){
-    scanf("%d%d%d%d",&T,&A,&S,&B);
-    FOR(i,1,A){
-        int x;scanf("%d",&x);a[x]++;
-    }
-    f[now][0] = f[now^1][0] = 1;
-    FOR(i,1,T){
-        now ^= 1;
-        FOR(j,1,B){
-            if(j-a[i]-1 >= 0) f[now][j] = (f[now^1][j]+f[now][j-1]-f[now^1][j-a[i]-1]+ha)%ha;
-            else f[now][j] = (f[now^1][j]+f[now][j-1])%ha;
-        }
-        //now ^= 1;
-    }
-    int ans = 0;
-    FOR(i,S,B) (ans += f[now][i]) %= ha;
-    printf("%d\n",ans);
+    int T;scanf("%d",&T);
+    while(T--) Solve();
     return 0;
 }

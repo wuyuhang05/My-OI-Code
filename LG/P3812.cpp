@@ -22,15 +22,29 @@
 #define CLR(i,a) memset(i,a,sizeof(i))
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
+//#define int LL
+const int MAXN = 50+5;
+LL a[MAXN],b[MAXN*100],n,base=62;
 
-int N;
-
-inline void qpow(int a,int n){
-    
+inline void Gauss(){
+    FOR(i,1,n){
+        LL x = a[i];
+        ROF(j,base,0){
+            if((x>>j)&1){
+                if(b[j]) x ^= b[j];
+                else {b[j] = x;break;}
+            }
+        }
+    }
 }
-
+LL ans = 0;
 int main(){
-    scanf("%d",&N);
-    
+    scanf("%lld",&n);
+    FOR(i,1,n) scanf("%lld",a+i);
+    Gauss();
+    ROF(i,base,0) ans = std::max(ans,ans^b[i]);
+    printf("%lld\n",ans);
     return 0;
 }
+/*
+*/

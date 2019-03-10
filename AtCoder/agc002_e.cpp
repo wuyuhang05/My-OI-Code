@@ -4,8 +4,6 @@
 #include <climits>
 #include <cstdio>
 #include <vector>
-#include <cstdlib>
-#include <ctime>
 #include <cmath>
 #include <queue>
 #include <stack>
@@ -17,20 +15,29 @@
 #define U unsigned
 #define FOR(i,a,b) for(Re int i = a;i <= b;++i)
 #define ROF(i,a,b) for(Re int i = a;i >= b;--i)
-#define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
-#define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
 #define CLR(i,a) memset(i,a,sizeof(i))
 #define BR printf("--------------------\n")
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-int N;
+const int MAXN = 2e5 + 5;
+int n,a[MAXN],ans,t;
 
-inline void qpow(int a,int n){
-    
+inline bool cmp(int x,int y){
+    return x > y;
 }
 
 int main(){
-    scanf("%d",&N);
-    
+    scanf("%d",&n);
+    FOR(i,1,n) scanf("%d",a+i);
+    std::sort(a+1,a+n+1,cmp);
+    for(;a[t]>=t;t++);t--;
+    if(!((a[t]-t)%2)){
+        int j = 0;
+        for(;a[t+j]>=t;j++);
+        if(j & 1){
+            puts("Second");return 0;
+        }
+    }
+    puts("First");
     return 0;
 }

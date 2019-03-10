@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "command": "g++",  //command 和 args 组合为编译c++命令，即 g++ -g xxx.cpp -o a.out
     "isShellCommand": true,
-    "args": ["-g","${file}","-o","a.out"],  //${file}代表着任意文件名，代替了helloworld.cpp
+    "args": ["-g","${file}","-o","a.out","-std=c++11"],  //${file}代表着任意文件名，代替了helloworld.cpp
     "showOutput": "always",
     "problemMatcher": {  //正则匹配，删除无用符号
         "owner": "cpp",

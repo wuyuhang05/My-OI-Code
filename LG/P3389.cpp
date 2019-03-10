@@ -27,28 +27,34 @@
 #define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 1e7 + 5;
-const int ha = 1000000;
-
-int T,A,S,B;
-int a[MAXN],f[2][MAXN],now;
+const double EPS = 1e-7;
+const int MAXN = 200+5;
+double d[MAXN][MAXN],ans[MAXN];
+int n;
 
 int main(){
-    scanf("%d%d%d%d",&T,&A,&S,&B);
-    FOR(i,1,A){
-        int x;scanf("%d",&x);a[x]++;
-    }
-    f[now][0] = f[now^1][0] = 1;
-    FOR(i,1,T){
-        now ^= 1;
-        FOR(j,1,B){
-            if(j-a[i]-1 >= 0) f[now][j] = (f[now^1][j]+f[now][j-1]-f[now^1][j-a[i]-1]+ha)%ha;
-            else f[now][j] = (f[now^1][j]+f[now][j-1])%ha;
+    scanf("%d",&n);
+    FOR(i,1,n) FOR(j,1,n+1) scanf("%lf",&d[i][j]);
+    FOR(i,1,n){
+        int r = i;
+        FOR(j,i+1,n) if(std::fabs(d[r][i]) < std::fabs(d[j][i])) r = j;
+        if(std::fabs(d[r][i]) < EPS){
+            puts("No Solution");
+            return 0;
         }
-        //now ^= 1;
+        if(i != r) std::swap(d[r],d[i]);
+        double div = d[i][i];
+        FOR(j,i,n+1) d[i][j] /= div;
+        FOR(j,i+1,n){
+            div = d[j][i];
+            FOR(k,i,n+1) d[j][k] -= d[i][k]*div;
+        }
     }
-    int ans = 0;
-    FOR(i,S,B) (ans += f[now][i]) %= ha;
-    printf("%d\n",ans);
+    ans[n] = d[n][n+1];
+    ROF(i,n-1,1){
+        ans[i] = d[i][n+1];
+        FOR(j,i+1,n) ans[i] -= (d[i][j]*ans[j]);
+    }
+    FOR(i,1,n) printf("%.2f\n",ans[i]);
     return 0;
 }
