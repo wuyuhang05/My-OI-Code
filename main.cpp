@@ -1,36 +1,38 @@
-#include <algorithm>
 #include <iostream>
-#include <cstring>
-#include <climits>
-#include <cstdio>
-#include <vector>
-#include <cstdlib>
-#include <ctime>
-#include <cmath>
-#include <queue>
-#include <stack>
-#include <map>
-#include <set>
-
-#define Re register
-#define LL long long
-#define U unsigned
-#define FOR(i,a,b) for(Re int i = a;i <= b;++i)
-#define ROF(i,a,b) for(Re int i = a;i >= b;--i)
-#define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
-#define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
-#define CLR(i,a) memset(i,a,sizeof(i))
-#define BR printf("--------------------\n")
-#define DEBUG(x) std::cerr << #x << '=' << x << std::endl
-
-int N;
-
-inline void qpow(int a,int n){
-    
+using namespace std;
+const long long M = 998244353;
+const int N = 100007;
+int pa[N];
+long long w, p1[N];
+long long fpow(long long a, long long p)
+{
+	long long ans = 1;
+	while (p)
+	{
+		if (p & 1)
+			ans = ans * a % M;
+		a = a * a % M;
+		p >>= 1;
+	}
+	return ans;
 }
-
-int main(){
-    scanf("%d",&N);
-    
-    return 0;
+long long arc(long long a)
+{
+	return fpow(a, M - 2);
+}
+int n;
+long long a, b;
+long long ans;
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin >> n;
+	p1[0] = 1;
+	for (int i = 1; i <= n; i++)
+	{
+		cin >> w >> a >> b >> pa[i];
+		p1[i] = ((b - a) * arc(b) % M) * p1[pa[i]] % M;
+		ans = (ans + p1[i] * w % M) % M;
+	}
+	cout << ans << " " << p1[n] << endl;
 }
