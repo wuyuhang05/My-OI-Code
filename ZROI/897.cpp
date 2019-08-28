@@ -30,7 +30,7 @@
 #define FOR(i,a,b) for(Re int i = a;i <= b;++i)
 #define ROF(i,a,b) for(Re int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
-
+#define int LL
 const int MAXN = 5e6 + 5;
 const int ha = 998244353;
 
@@ -55,9 +55,9 @@ inline void pushup(int x){
 }
 //(a+d)^2 = a^2+d^2+2ad
 inline void cover(int x,int l,int r,int d){
-    sm2[x] += d*d*(r-l+1)+2*d*sm[x];
-    sm[x] += (r-l+1)*d;
-    tag[x] += d;
+    (sm2[x] += (d*d%ha*(r-l+1)%ha+2*d%ha*sm[x]%ha)%ha) %= ha;
+    (sm[x] += (r-l+1)*d%ha) %= ha;
+    (tag[x] += d) %= ha;
 }
 
 inline void pushdown(int x,int l,int r){
@@ -85,7 +85,7 @@ inline int querysum(int x,int l,int r,int L,int R){
     int mid = (l + r) >> 1;pushdown(x,l,r);
     if(R <= mid) return querysum(lc,l,mid,L,R);
     if(L > mid) return querysum(rc,mid+1,r,L,R);
-    return querysum(lc,l,mid,L,mid)+querysum(rc,mid+1,r,mid+1,R);
+    return (querysum(lc,l,mid,L,mid)+querysum(rc,mid+1,r,mid+1,R))%ha;
 }
 
 inline int query1(int l,int r){
@@ -96,9 +96,9 @@ inline int query1(int l,int r){
 inline int query2(int x,int l,int r,int L,int R){
     if(l == L && r == R) return sm2[x];
     int mid = (l + r) >> 1;pushdown(x,l,r);
-    if(R <= mid) return querysum(lc,l,mid,L,R);
-    if(L > mid) return querysum(rc,mid+1,r,L,R);
-    return query2(lc,l,mid,L,mid)+query2(rc,mid+1,r,mid+1,R);
+    if(R <= mid) return query2(lc,l,mid,L,R);
+    if(L > mid) return query2(rc,mid+1,r,L,R);
+    return (query2(lc,l,mid,L,mid)+query2(rc,mid+1,r,mid+1,R))%ha;
 }
 
 int fac[MAXN],inv[MAXN],pw[MAXN],ii[MAXN];
@@ -110,11 +110,11 @@ inline void prework(int n){
     inv[n] = qpow(fac[n]);
     ROF(i,n-1,0) inv[i] = 1ll*inv[i+1]*(i+1)%ha;
     FOR(i,1,n) ii[i] = fac[i-1]*inv[i]%ha; // 1/i
-    FOR(i,1,n) pw[i] = pw[i-1]*2%ha;
-    FOR(i,1,n) A[i] = (pw[n]-1)*ii[n]%ha;
-    FOR(i,1,n) B[i] = B[i-1]+(pw[i]-1)*ii[i]%ha;
+    FOR(i,1,n) pw[i] = pw[i-1]*2ll%ha;
+    FOR(i,1,n) A[i] = (pw[i]-1+ha)%ha*ii[i]%ha;
+    FOR(i,1,n) B[i] = (B[i-1]+(pw[i]-1+ha)%ha*ii[i]%ha)%ha;
     FOR(i,1,n) B[i] = B[i]*ii[i]%ha;
-    FOR(i,1,n) C[i] = (C[i-1]+(i-1)*inv[i]%ha+(pw[i-1]-1+ha)%ha-inv[i]*(pw[i]-2+ha)%ha+ha)%ha;
+    FOR(i,1,n) C[i] = (C[i-1]+((i-1)*ii[i]%ha+(pw[i-1]-1+ha)%ha-ii[i]*(pw[i]-2+ha)%ha+ha)%ha)%ha;
     FOR(i,1,n) C[i] = C[i]*ii[i]%ha*ii[i-1]%ha;
 }
 /*
@@ -129,18 +129,22 @@ inline int query(int l,int r){
     int x2 = 1ll*s2*B[r-l+1]%ha;
     int x3 = 1ll*s2*C[r-l+1]%ha;
     int x4 = 1ll*s1*C[r-l+1]%ha;
-    return (x1-x2+x3-x4);
+    int ans = (x1-x2+ha)%ha;
+    (ans += x3) %= ha;
+    ans = (ans-x4+ha)%ha;
+    return ans;
+    return (x1-x2+x3-x4+ha+ha)%ha;
 }
 
-int main(){
-    scanf("%d%d",&n,&m);
+signed main(){
+    scanf("%lld%lld",&n,&m);prework(n+2);
     FOR(i,1,m){
-        int opt,l,r,a;scanf("%d%d%d",&opt,&l,&r);
-        if(opt == 1){scanf("%d",&a);
+        int opt,l,r,a;scanf("%lld%lld%lld",&opt,&l,&r);
+        if(opt == 1){scanf("%lld",&a);
             modify(1,1,n,l,r,a);
         }
         else{
-            printf("%d\n",query(l,r));
+            printf("%lld\n",query(l,r));
         }
     }
     return 0;

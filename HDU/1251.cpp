@@ -35,8 +35,8 @@ Node *New(){
 
 void insert(char *str){
 	Node *v = root;
-	int len = strlen(str+1);
-	FOR(i,1,len){
+	int len = strlen(str);
+	FOR(i,0,len-1){
 		int x = str[i] - 'a';
 		if(!v->next[x]) v->next[x] = New();
 		v = v->next[x];
@@ -45,9 +45,9 @@ void insert(char *str){
 }
 
 int calc(char *str){
-	int len = strlen(str+1);
+	int len = strlen(str);
 	Node *v = root;
-	FOR(i,1,len){
+	FOR(i,0,len-1){
 		int x = str[i]-'a';
 		if(!v->next[x]) return 0;
 		v = v->next[x];
@@ -61,14 +61,11 @@ int N,M;
 int main(){
 	//freopen("a.in","r",stdin);
 	root = New();
-	scanf("%d",&N);
-	FOR(i,1,N){
-		scanf("%s",str+1);
-		insert(str);
-	}
-	scanf("%d",&M);
-	FOR(i,1,M){
-		scanf("%s",str+1);
+    while(gets(str)){
+        if(str[0] == '\0') break;
+        else insert(str);
+    }
+    while(~scanf("%s",str)){
 		printf("%d\n",calc(str));
 	}
 	return 0;
