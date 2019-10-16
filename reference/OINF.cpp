@@ -13,7 +13,7 @@
 #pragma GCC optimize("unroll-loops")
 #pragma GCC optimize("-falign-jumps")
 #pragma GCC optimize("-falign-loops")
-#pragma GCC optimize("-falign-labels")
+#pragma GCC optimize("-falign-labels") 
 #pragma GCC optimize("-fdevirtualize")
 #pragma GCC optimize("-fcaller-saves")
 #pragma GCC optimize("-fcrossjumping")

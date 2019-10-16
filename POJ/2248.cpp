@@ -1,3 +1,4 @@
+
 #include <algorithm>
 #include <iostream>
 #include <cstring>
@@ -37,7 +38,6 @@ inline bool dfs(int step){
     if(step > len){
         return t[len] == n;
     }
-    //if(found) return;
     CLR(x,0);
     ROF(i,step-1,1){
         ROF(j,step-1,1){
@@ -55,7 +55,7 @@ inline void Solve(){
         puts("1");return;
     }
     FOR(i,2,n){
-        len = i;//CLR(t,0);
+        len = i;
         CLR(x,0);
         t[1] = 1;
         if(dfs(2)){
@@ -63,7 +63,6 @@ inline void Solve(){
             return;
         }
     }
-    //FOR(i,0,(int)ans.size()-1) printf("%d ",ans[i]);puts("");
 }
 
 int main(){
