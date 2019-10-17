@@ -4,7 +4,7 @@
  * 使其天天爆零
  * 我不由自主地膜拜真神sqy。
  * Author: RainAir
- * Time: 2019-10-16 10:52:50
+ * Time: 2019-10-16 18:05:13
  */
 #include <algorithm>
 #include <iostream>
@@ -24,7 +24,7 @@
 #define fi first
 #define se second
 #define U unsigned
-#define P std::pair
+#define P std::pair<int,int>
 #define LL long long
 #define pb push_back
 #define MP std::make_pair
@@ -35,19 +35,21 @@
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
 const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN],n;
+const int ha = 1e9 + 7;
+int x[MAXN],y[MAXN];
+int n,m;
+P a[MAXN];
+int N;
+std::vector<int> S;
+int f[MAXN];
 
 struct BIT{
     #define lowbit(x) ((x)&(-(x)))
-    int tree[MAXN<<1];
-
-    inline void clear(){
-        CLR(tree,0);
-    }
+    int tree[MAXN];
 
     inline void add(int pos,int d){
-        while(pos <= n+233){
-            tree[pos] += d;
+        while(pos < MAXN){
+            (tree[pos] += d) %= ha;
             pos += lowbit(pos);
         }
     }
@@ -55,43 +57,43 @@ struct BIT{
     inline int query(int pos){
         int res = 0;
         while(pos){
-            res += tree[pos];
+            (res += tree[pos]) %= ha;
             pos -= lowbit(pos);
         }
         return res;
     }
 }bit;
 
-inline bool chk(int k){
-    b[0] = 0;
-    FOR(i,1,n) b[i] = a[i]<k ? -1 : 1;
-    int mn = 0;LL ans = 0;
-    FOR(i,1,n) b[i] += b[i-1],mn = std::min(mn,b[i]);// 0~n+1
-    mn = -mn;++mn;
-    FOR(i,0,n) b[i] += mn;
-    bit.clear();bit.add(b[0],1);
-    FOR(i,1,n){
-        ans += bit.query(b[i]);
-        bit.add(b[i],1);
-    }
- //   DEBUG(4ll*ans);DEBUG(1ll*n*(n-1));
-    return 4*ans >= 1ll*n*(n+1);
+inline bool cmp(P x,P y){
+    return x.fi == y.fi ? x.se > y.se : x.fi < y.fi;// 同列不得转移
 }
 
 int main(){
-   // freopen("a.in","r",stdin);
-    scanf("%d",&n);
-    int l = 1e9,r = 0;
-    FOR(i,1,n) scanf("%d",a+i),l = std::min(l,a[i]),r = std::max(r,a[i]);
-    int ans = -1;
-//    DEBUG(chk(1));
-//    return 0;
-    while(l <= r){
-        int mid = (l + r) >> 1;
-        if(chk(mid)) ans = mid,l = mid+1;
-        else r = mid-1;
+    scanf("%d%d",&n,&m);
+    FOR(i,1,n) scanf("%d",x+i);
+    FOR(i,1,m) scanf("%d",y+i);
+    std::sort(x+1,x+n+1);std::sort(y+1,y+m+1);
+    FOR(i,1,n){
+        if(x[i] <= y[1] || x[i] >= y[m]) continue;
+        int p = std::lower_bound(y+1,y+m+1,x[i]) - y;
+        if(x[i] == y[p]) continue;
+        a[++N] = MP(x[i]-y[p-1],y[p]-x[i]);
     }
+    std::sort(a+1,a+N+1,cmp);
+    FOR(i,1,N) S.pb(a[i].se);
+    std::sort(all(S));
+    S.erase(std::unique(all(S)),S.end());
+    FOR(i,1,N) a[i].se = std::lower_bound(all(S),a[i].se)-S.begin() + 2;
+    f[0] = 1;
+    N = std::unique(a+1,a+N+1)-a-1;
+//    FOR(i,1,N) printf("%d %d\n",a[i].fi,a[i].se);
+    FOR(i,1,N){
+        f[i] = bit.query(a[i].se-1)+1;f[i] %= ha;
+        DEBUG(f[i]);
+        bit.add(a[i].se,f[i]);
+    }
+    int ans = 0;
+    FOR(i,0,N) (ans += f[i]) %= ha;
     printf("%d\n",ans);
     return 0;
 }
-
