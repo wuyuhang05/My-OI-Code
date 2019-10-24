@@ -1,6 +1,6 @@
 /*
- * Author: $%U%$
- * Time: $%Y%$-$%M%$-$%D%$ $%h%$:$%m%$:$%s%$
+ * Author: RainAir
+ * Time: 2019-10-24 08:08:59
  */
 #include <algorithm>
 #include <iostream>
@@ -29,8 +29,26 @@
 #define FOR(i,a,b) for(int i = a;i <= b;++i)
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
+#define int LL
+const int MAXN = 1e5 + 5;
+int a[MAXN],n;
+int ans = 0;
 
-int main(){
-
+signed main(){
+    scanf("%lld",&n);
+    FOR(i,1,n) scanf("%lld",a+i);
+    FOR(i,2,n){
+        if(a[i-1] < a[i] && a[i] > a[i+1]){
+            ans += std::abs(a[i]-std::max(a[i-1],a[i+1]));
+            a[i] = std::max(a[i-1],a[i+1]);
+        }
+        else if(a[i-1] > a[i] && a[i] < a[i+1]){
+            ans += std::abs(a[i]-std::min(a[i-1],a[i+1]));
+            a[i] = std::min(a[i-1],a[i+1]);
+        }
+    }
+    FOR(i,2,n) ans += std::abs(a[i]-a[i-1]);
+    printf("%lld\n",ans);
     return 0;
 }
+
