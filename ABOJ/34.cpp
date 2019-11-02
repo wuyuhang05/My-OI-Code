@@ -61,7 +61,7 @@ inline void insert(int x,int l,int r,const Point &p,int pos){
     if(r == pos){ // build
         std::sort(all(t[x]));
         FOR(i,0,r-l){
-            while(v[x].size() > 1 && ((t[x][i]-v[x][v[x].size()-1])^(v[x][v[x].size()-2]-v[x][v[x].size()-1])) >= 0) v[x].pop_back();
+           while(v[x].size() > 1 && ((t[x][i]-v[x][v[x].size()-1])^(v[x][v[x].size()-2]-v[x][v[x].size()-1])) >= 0) v[x].pop_back();
             v[x].pb(t[x][i]);
         }
     }
@@ -102,5 +102,9 @@ int main(){
             printf("%d\n",lastans=query(1,1,N,l,r,Point(x,y)));
         }
     }
+        Point t = Point(1+rand()%233,1+rand()%233);
+    build(1);
+    for(auto x:poly[1]) DEBUG((x*t));
+
     return 0;
 }
