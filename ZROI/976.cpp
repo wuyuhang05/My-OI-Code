@@ -1,6 +1,6 @@
 /*
  * Author: RainAir
- * Time: 2019-10-27 22:06:21
+ * Time: 2019-11-03 19:22:05
  */
 #include <algorithm>
 #include <iostream>
@@ -29,25 +29,27 @@
 #define FOR(i,a,b) for(int i = a;i <= b;++i)
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
-#define int LL
-const int MAXN = 100+5;
-char S[MAXN],T[MAXN];
-int n,m;
-std::map<LL,int> f[MAXN];
-int gS[MAXN][2],gT[MAXN][2];
 
-signed main(){
-    scanf("%s%s",S+1,T+1);
-    n = strlen(S+1);m = strlen(T+1);
-    FOR(i,1,n+m){
-        FOR(j,1,std::max(n,m)){
+const int MAXN = 100+5;
+const int ha = 1e9 + 7;
+int n,m;
+char S[MAXN],T[MAXN];
+LL gS[MAXN][2],gT[MAXN][2];
+std::map<LL,int> f[MAXN];
+
+int main(){
+    scanf("%s%s",S,T);
+    n = strlen(S);m = strlen(T);
+    if(n < m) std::swap(n,m),std::swap(S,T);
+    FOR(i,0,n+m-1){
+        FOR(j,0,m){
             FOR(k,0,1){
-                if(j >= 1 && j <= m && (T[j] == '1') == k){
-                    gT[i][k] |= (1ll<<(j-1));
-                }
-                if(i-j >= 1 && i-j <= n && (S[i-j] == '1') == k){
-                    gS[i][k] |= (1ll<<(j-1));
-                }
+                if(i-j < n && i-j >= 0 && k == (S[i-j]-'0')) gS[i][k] |= (1ll<<j);
+            }
+        }
+        FOR(j,0,m){
+            FOR(k,0,1){
+                if(k == (T[j]-'0')) gT[i][k] |= (1ll<<j);
             }
         }
     }
@@ -55,11 +57,12 @@ signed main(){
     FOR(i,0,n+m-1){
         for(auto x:f[i]){
             FOR(k,0,1){
-                f[i+1][(gS[i+1][k]&(x.fi))|(gT[i+1][k]&(x.fi<<1))] += x.se;
+                LL nxt = (x.fi&gS[i][k])|(((x.fi&gT[i][k])<<1));
+                f[i+1][nxt] += x.se;
+                f[i+1][nxt] %= ha;
             }
         }
     }
-    int ans = 0;
-    printf("%lld\n",f[n+m][(1<<m)]);
+    printf("%d\n",f[n+m][(1ll<<m)]);
     return 0;
 }
