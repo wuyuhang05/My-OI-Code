@@ -1,3 +1,8 @@
+/*
+只需要存在一个长度为 d/2 的公共子串就好了
+我们考虑把所有可能的长度为 d/2 的子串插进去
+然后拆前缀和 数位 dp:f[i][j][0/1] 表示填到第 i 位,第 j 个点,是否卡上界
+ */
 #include <algorithm>
 #include <iostream>
 #include <cstring>
