@@ -2,84 +2,104 @@
 #include <iostream>
 #include <cstring>
 #include <climits>
-#include <cstdio>
-#include <vector>
 #include <cstdlib>
-#include <ctime>
+#include <cstdio>
+#include <bitset>
+#include <vector>
 #include <cmath>
+#include <ctime>
 #include <queue>
 #include <stack>
 #include <map>
 #include <set>
 
-#define Re register
-#define LL long long
+#define fi first
+#define se second
 #define U unsigned
-#define FOR(i,a,b) for(Re int i = a;i <= b;++i)
-#define ROF(i,a,b) for(Re int i = a;i >= b;--i)
-#define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
-#define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
+#define P std::pair
+#define LL long long
+#define pb push_back
+#define MP std::make_pair
+#define all(x) x.begin(),x.end()
 #define CLR(i,a) memset(i,a,sizeof(i))
-#define BR printf("--------------------\n")
+#define FOR(i,a,b) for(int i = a;i <= b;++i)
+#define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
-#define int LL
-const int MAXN = 100000+5;
 
-int head[MAXN],cnt,size[MAXN],son[MAXN],dep[MAXN],fa[MAXN];
-int ans[MAXN],val[MAXN],c[MAXN],maxv,sum;
-int N;
+const int MAXN = 1e5 + 5;
 
 struct Edge{
-    int to,next;
+	int to,nxt;
 }e[MAXN<<1];
 
+int head[MAXN],cnt;
+int n;
+
 inline void add(int u,int v){
-    e[++cnt] = (Edge){v,head[u]};head[u] = cnt;
+	e[++cnt] = (Edge){v,head[u]};head[u] = cnt;
+	e[++cnt] = (Edge){u,head[v]};head[v] = cnt;
 }
 
-void dfs1(int v){
-    size[v] = 1;
-    for(int i = head[v];i;i = e[i].next){
-        if(e[i].to == fa[v]) continue;
-        dep[e[i].to] = dep[v]+1;fa[e[i].to] = v;
-        dfs1(e[i].to);size[v] += size[e[i].to];
-        son[v] = (size[son[v]] < size[e[i].to]) ? e[i].to : son[v];
-    }
+int son[MAXN],sz[MAXN];
+
+inline void dfs1(int v,int fa=0){
+	sz[v] = 1;
+	for(int i = head[v];i;i = e[i].nxt){
+		if(e[i].to == fa) continue;
+		dfs1(e[i].to,v);sz[v] += sz[e[i].to];
+		if(sz[son[v]] < sz[e[i].to]) son[v] = e[i].to;
+	}
 }
 
-bool vis[MAXN];
+int t[MAXN],mx;
+LL ans;
 
-void change(int v,int fa,int k){
-    c[val[v]] += k;
-    if(k > 0 && c[val[v]] >= maxv){
-        if(c[val[v]] > maxv) sum = 0,maxv = c[val[v]];
-        sum += val[v];
-    }
-    for(int i = head[v];i;i = e[i].next){
-        if(vis[e[i].to] || e[i].to == fa) continue;
-        change(e[i].to,v,k);
-    }
+inline void add(int x){
+	t[x]++;
+	if(t[x] > mx) mx = t[x],ans = x;
+	else if(t[x] == mx) ans += x;
 }
 
-void dfs2(int v,int fa=0,bool used=false){
-    for(int i = head[v];i;i = e[i].next){
-        if(e[i].to == fa || e[i].to == son[v]) continue;
-        dfs2(e[i].to,v);q
-    }
-    if(son[v]) dfs2(son[v],v,1),vis[son[v]] = true;
-    change(v,fa,1);ans[v] = sum;
-    if(son[v]) vis[son[v]] = false;
-    if(!used) change(v,fa,-1),maxv = sum = 0;
+inline void del(int x){
+	t[x]--;
 }
 
-signed main(){
-    scanf("%I64d",&N);
-    FOR(i,1,N) scanf("%I64d",val+i);
-    FOR(i,1,N-1){
-        int u,v;scanf("%I64d%I64d",&u,&v);
-        add(u,v);add(v,u);
-    }
-    dfs1(1);dfs2(1);
-    FOR(i,1,N) printf("%I64d ",ans[i]);puts("");
-    return 0;
+int ban;
+int col[MAXN];
+
+inline void change(int v,int fa,int opt){
+	if(opt == 1) add(col[v]);
+	else del(col[v]);
+	for(int i = head[v];i;i = e[i].nxt){
+		if(e[i].to == fa || e[i].to == ban) continue;
+		change(e[i].to,v,opt);
+	}
+}
+
+LL anss[MAXN];
+
+inline void dfs2(int v,int fa=0,int tag=0){
+	for(int i = head[v];i;i = e[i].nxt){
+		if(e[i].to == fa || e[i].to == son[v]) continue;
+		dfs2(e[i].to,v,0);
+	}
+	if(son[v]) dfs2(son[v],v,1);ban = son[v];
+	// if(v == 1) FOR(i,1,3) printf("%d%c",t[i]," \n"[i==3]);
+	change(v,fa,1);
+	// if(v == 1) FOR(i,1,3) printf("%d%c",t[i]," \n"[i==3]);
+	anss[v] = ans;ban = 0;
+	if(!tag) change(v,fa,-1),mx = ans = 0;
+}
+
+int main(){
+	scanf("%d",&n);
+	FOR(i,1,n) scanf("%d",col+i);
+	FOR(i,1,n-1){
+		int u,v;scanf("%d%d",&u,&v);
+		add(u,v);
+	}
+	dfs1(1);
+	dfs2(1);
+	FOR(i,1,n) printf("%lld%c",anss[i]," \n"[i==n]);
+	return 0;
 }

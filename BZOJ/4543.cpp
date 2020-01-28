@@ -2,84 +2,94 @@
 #include <iostream>
 #include <cstring>
 #include <climits>
-#include <cstdio>
-#include <vector>
 #include <cstdlib>
-#include <ctime>
+#include <cstdio>
+#include <bitset>
+#include <vector>
 #include <cmath>
+#include <ctime>
 #include <queue>
 #include <stack>
 #include <map>
 #include <set>
 
 #define fi first
-#define lc (x<<1)
 #define se second
 #define U unsigned
-#define rc (x<<1|1)
-#define Re register
+#define P std::pair
 #define LL long long
+#define pb push_back
 #define MP std::make_pair
+#define all(x) x.begin(),x.end()
 #define CLR(i,a) memset(i,a,sizeof(i))
-#define FOR(i,a,b) for(Re int i = a;i <= b;++i)
-#define ROF(i,a,b) for(Re int i = a;i >= b;--i)
-#define SFOR(i,a,b,c) for(Re int i = a;i <= b;i+=c)
-#define SROF(i,a,b,c) for(Re int i = a;i >= b;i-=c)
+#define FOR(i,a,b) for(int i = a;i <= b;++i)
+#define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 100000+5;
+const int MAXN = 1e5 + 5;
 
 struct Edge{
-    int to,next;
+    int to,nxt;
 }e[MAXN<<1];
-int head[MAXN],cnt,len[MAXN],son[MAXN],N;
-LL t[MAXN<<2],*f[MAXN],*g[MAXN],*id = t,ans;
+
+int head[MAXN],cnt;
 
 inline void add(int u,int v){
     e[++cnt] = (Edge){v,head[u]};head[u] = cnt;
+    e[++cnt] = (Edge){u,head[v]};head[v] = cnt;
 }
 
-inline void dfs(int v,int fa){
-    for(int i = head[v];i;i = e[i].next){
+int son[MAXN],dep[MAXN],len[MAXN];
+
+inline void dfs1(int v,int fa=0){
+    for(int i = head[v];i;i = e[i].nxt){
         if(e[i].to == fa) continue;
-        dfs(e[i].to,v);
-        son[v] = len[e[i].to] > len[son[v]] ? e[i].to : son[v];
+        dep[e[i].to] = dep[v] + 1;
+        dfs1(e[i].to,v);
+        son[v] = len[son[v]] < len[e[i].to] ? e[i].to : son[v];
     }
-    len[v] = len[son[v]]+1;
+    len[v] = len[son[v]] + 1;
 }
 
-void dp(int v,int fa){
+LL *f[MAXN],*g[MAXN];
+LL pool[MAXN<<2],*tail = pool;
+LL ans;
+int n;
+
+inline void dfs2(int v,int fa=0){
     if(son[v]){
-        f[son[v]] = f[v] + 1;g[son[v]] = g[v] - 1;
-        dp(son[v],v);
+        f[son[v]] = f[v]+1;
+        g[son[v]] = g[v]-1;
+        dfs2(son[v],v);
     }
     f[v][0] = 1;ans += g[v][0];
-    for(int i = head[v];i;i = e[i].next){
-        int to = e[i].to;if(to == fa || to == son[v]) continue;
-        f[to] = id;id += len[to]<<1;g[to] = id;id += len[to] << 1;dp(to,v);
-        FOR(j,0,len[to]-1){
-            if(j) ans += f[v][j-1]*g[to][j];
-            ans += f[to][j]*g[v][j+1];
+    for(int i = head[v];i;i = e[i].nxt){
+        if(e[i].to == fa || e[i].to == son[v]) continue;
+        f[e[i].to] = tail;tail += len[e[i].to]<<1;
+        g[e[i].to] = tail;tail += len[e[i].to]<<1;
+        dfs2(e[i].to,v);
+        FOR(j,0,len[e[i].to]){
+            if(j+1 <= len[e[i].to]-1) ans += f[v][j]*g[e[i].to][j+1];
+            if(j) ans += f[e[i].to][j-1]*g[v][j];
         }
-        FOR(j,0,len[to]-1){
-            g[v][j+1] += f[v][j+1]*f[to][j];
-            if(j) g[v][j-1] += g[to][j];
-            f[v][j+1] += f[to][j];
+        FOR(j,0,len[e[i].to]){
+            if(j) g[v][j] += f[v][j]*f[e[i].to][j-1];
+            if(j+1 <= len[e[i].to]-1) g[v][j] += g[e[i].to][j+1];
+            if(j) f[v][j] += f[e[i].to][j-1];
         }
     }
 }
 
 int main(){
-    scanf("%d",&N);
-    FOR(i,1,N-1){
+    scanf("%d",&n);
+    FOR(i,1,n-1){
         int u,v;scanf("%d%d",&u,&v);
-        add(u,v);add(v,u);
+        add(u,v);
     }
-    dfs(1,0);f[1] = id;id += len[1]<<1;g[1] = id;id += len[1]<<1;
-    dp(1,0);
-    printf("%d\n",ans);
+    dfs1(1);
+    f[1] = tail;tail += len[1]<<1;
+    g[1] = tail;tail += len[1]<<1;
+    dfs2(1);
+    printf("%lld\n",ans);
     return 0;
 }
-/*
-f[i][j]
-*/
