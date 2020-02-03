@@ -1,3 +1,4 @@
+#pragma GCC optimize("Ofast")
 #include <algorithm>
 #include <iostream>
 #include <cstring>
@@ -16,17 +17,17 @@
 #define fi first
 #define se second
 #define U unsigned
-#define P std::pair
-#define Re register
+#define P std::pair<int,int>
 #define LL long long
 #define pb push_back
 #define MP std::make_pair
 #define all(x) x.begin(),x.end()
 #define CLR(i,a) memset(i,a,sizeof(i))
-#define FOR(i,a,b) for(Re LL i = a;i <= b;++i)
-#define ROF(i,a,b) for(Re LL i = a;i >= b;--i)
+#define FOR(i,a,b) for(int i = a;i <= b;++i)
+#define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 #define int LL
+
 const int prime[] = {0,2,3,5,7,11,13,17,19,23};
 
 inline LL qmul(int x,int y,int p){
@@ -70,7 +71,6 @@ inline bool isprime(int x){
     return true;
 }
 
-
 inline int gcd(int a,int b){
     if(a < b) std::swap(a,b);
     if(!b) return a;
@@ -90,7 +90,6 @@ inline LL calc(int x,int t){
     LL v0 = rnd(x-1),v=v0,s = 1,cnt = 0,k = 1;
     while(true){
         v = (qmul(v,v,x)+t)%x;s = qmul(s,std::abs(v-v0),x);
-        //v = (1ll*v*v%x+t)%x;s = 1ll*s*std::abs(v-v0)%x;
         if(v == v0 || !s) return x;
         if(++cnt == k){
             int g = gcd(s,x);
@@ -101,31 +100,32 @@ inline LL calc(int x,int t){
     return x;
 }
 
-int ans = 0;
+std::vector<int> ans;
 
 inline void work(int x,int t){
-    if(x <= ans || x == 1) return;
-    if(isprime(x)) {ans = std::max(ans,x);return;}
+    if(x == 1) return;
+    if(isprime(x)){
+        ans.pb(x);
+        return;
+    }
     int y = x;while((y = calc(x,t--)) == x);
     while(!(x%y)) x /= y;
     work(x,t);work(y,t);
 }
 
-signed main(){
-    //freopen(".in","r",stdin);
-   // freopen(".out","w",stdout);
-    srand(time(NULL));
-    int T;scanf("%lld",&T);
-    while(T--){
-        int x;scanf("%lld",&x);//DEBUG(isprime(x));
-        ans = 0;
-        work(x,19260817);
-        if(ans == x){
-            puts("Prime");
-            continue;
-        }
-        printf("%lld\n",ans);
-    }
-    return 0;
-}
+int p;
+std::vector<int> Div;
 
+inline void Solve(){int val;
+    scanf("%lld",&val);
+    ans.clear();work(val,19260817);
+    Div.clear();Div.pb(1);int tt = val;
+    FOR(i,0,(int)ans.size()-1){
+        int e = 0;while(!(tt%ans[i])) tt /= ans[i],e++;
+        int sz = (int)Div.size()-1;
+        FOR(k,0,sz){
+            int base = ans[i];
+            FOR(j,1,e) Div.pb(Div[k]*base),base *= ans[i];
+        }
+    }
+}
