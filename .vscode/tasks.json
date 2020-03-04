@@ -1,21 +1,30 @@
 {
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
-    "version": "0.1.0",
-    "command": "g++",  //command 和 args 组合为编译c++命令，即 g++ -g xxx.cpp -o a.out
-    "isShellCommand": true,
-    "args": ["-g","${file}","-o","a.out","-std=c++11"],  //${file}代表着任意文件名，代替了helloworld.cpp
-    "showOutput": "always",
-    "problemMatcher": {  //正则匹配，删除无用符号
-        "owner": "cpp",
-        "fileLocation": ["relative", "${workspaceRoot}"],
-        "pattern": {
-            "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-            "file": 1,
-            "line": 2,
-            "column": 3,
-            "severity": 4,
-            "message": 5
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile",
+            "type": "shell",
+            "command": "g++",
+            "args": ["-g","${file}","-o","a.out","-std=c++11","-O2"],
+            // "windows": {
+            //     "command": "g++",  //command 和 args 组合为编译c++命令，即 g++ -g xxx.cpp -o a.out
+            //     "isShellCommand": true,
+            //       //${file}代表着任意文件名，代替了helloworld.cpp
+            // },
+            "problemMatcher": {  //正则匹配，删除无用符号
+                "owner": "cpp",
+                "fileLocation": ["relative", "${workspaceRoot}"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
         }
-    }
+    ],
 }
