@@ -22,7 +22,7 @@ const int MAXN = 1e5 + 5;
 char str[MAXN];
 int n;
 
-struct AM{
+struct SEQAM{
     int ch[MAXN][26],frm[MAXN],tot = 0,rt = 0;
 
     inline void build(){
@@ -38,7 +38,8 @@ struct AM{
             }
         }
     }
-}am;
+}seqam;
+
 char T[MAXN];
 int main(){
     int t;scanf("%d",&t);
