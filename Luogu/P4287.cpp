@@ -30,7 +30,7 @@ struct PAM{
         int v = las,c = str[p]-'a';
         while(str[p-len[v]-1] != str[p]) v = fail[v];
         if(!ch[v][c]){
-            ++tot;len[tot] = len[v]+1;int t = v;
+            ++tot;len[tot] = len[v]+2;int t = fail[v];
             while(str[p-len[t]-1] != str[p]) t = fail[t];
             fail[tot] = ch[t][c]?ch[t][c]:rt0;ch[v][c] = tot;
         }
@@ -38,18 +38,21 @@ struct PAM{
     }
 
     inline void build(){
-        FOR(i,1,tot) G[fail[i]].pb(i);
+        FOR(i,1,tot) if(i != fail[i]) G[fail[i]].pb(i);
     }
 }pam;
-std::map<int,int> S;
 int ans = 0;
+int S[MAXN];
 inline void dfs(int v){
-    if((pam.len[v]&1) == 0 && S[pam.len[v]/2] != 0) ans = std::max(ans,pam.len[v]);
-    S[pam.len[v]] = v;
+//    DEBUG(pam.len[v]);
+    if(!(pam.len[v]%4) && S[pam.len[v]/2] != 0) ans = std::max(ans,pam.len[v]);
+    if(!(pam.len[v]&1)) S[pam.len[v]] = 1;
+//    FOR(i,1,222) if(S[i]) printf("%d ",i);puts("");
+//    for(auto x:G[v]) DEBUG(x);
     for(auto x:G[v]){
         dfs(x);
     }
-    S.erase(pam.len[v]);
+    if(!(pam.len[v]&1)) S[pam.len[v]] = 0;
 }
 
 int main(){
