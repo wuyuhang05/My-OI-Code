@@ -28,6 +28,31 @@
 const int MAXN = 1e5 + 5;
 const int MAXM = 800+5;
 
+inline char nc(){
+    #define SIZE 1000000+3
+    static char buf[SIZE],*p1 = buf+SIZE,*p2 = buf+SIZE;
+    if(p1 == p2){
+        p1 = buf;p2 = buf+fread(buf,1,SIZE,stdin);
+        if(p1 == p2) return -1;
+    }
+    return *p1++;
+    #undef SIZE
+}
+
+template <typename T>
+inline void read(T &x){
+    x = 0;int flag = 0;char ch = nc();
+    while(!isdigit(ch)){
+        if(ch == '-') flag = 1;
+        ch = nc();
+    }
+    while(isdigit(ch)){
+        x = (x<<1) + (x<<3) + (ch^'0');
+        ch = nc();
+    }
+    if(flag) x = -x;
+}
+
 struct Edge{
 	int from,to,nxt,flow,cap,w;
 }e[MAXN<<1];
@@ -102,12 +127,12 @@ inline void work(){
 }
 
 signed main(){
-	scanf("%d%d",&n,&m);
+    read(n);read(m);
 	// DEBUG(1);
-	FOR(i,1,n) scanf("%d",c+i),tot += c[i];
+	FOR(i,1,n) read(c[i]),tot += c[i];
 	FOR(i,1,n){
 		FOR(j,1,m){
-			scanf("%d",&a[j][i]);
+            read(a[j][i]);
 		}
 	}
 	S = calc2(n)+1,T = calc2(n)+2,N = T;
@@ -125,3 +150,4 @@ signed main(){
 	printf("%d\n",minCost);
 	return 0;
 }
+
