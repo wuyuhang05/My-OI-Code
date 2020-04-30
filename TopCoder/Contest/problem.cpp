@@ -1,87 +1,65 @@
-// BEGIN CUT HERE
-
-// END CUT HERE
-#line 5 "problem.cpp"
-#include <algorithm>
-#include <iostream>
-#include <cstring>
-#include <climits>
-#include <cstdlib>
-#include <cstdio>
-#include <vector>
-#include <cmath>
-#include <ctime>
-#include <queue>
-#include <stack>
-#include <map>
-#include <set>
+#include<bits/stdc++.h>
 
 #define fi first
 #define se second
 #define U unsigned
-#define P std::pair<double,double>
-#define Re register
+#define P std::pair<int,int>
 #define LL long long
 #define pb push_back
 #define MP std::make_pair
 #define all(x) x.begin(),x.end()
 #define CLR(i,a) memset(i,a,sizeof(i))
-#define FOR(i,a,b) for(Re int i = a;i <= b;++i)
-#define ROF(i,a,b) for(Re int i = a;i >= b;--i)
+#define FOR(i,a,b) for(int i = a;i <= b;++i)
+#define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const double EPS = 1e-9;
-const double pi = acos(-1);
+const int MAXN = 20+1;
 
-class PolygonRotation{
-public:
-
-    inline double ds(P p1,P p2,double y){
-        if(p1.se == p2.se) return abs(std::max(p1.fi,p2.fi));
-        return std::abs(p1.fi+1.0*(p2.fi-p1.fi)/(p2.se-p1.se)*(y-p1.se));
-    }
-
-    int n;
-    
-    double f(double y,const std::vector<int> &X,const std::vector<int> &Y){
-        double max = 0.0;
-        FOR(i,0,n-1){
-            if(std::abs(Y[i]-y) <= EPS) max = std::max(max,1.0*X[i]);
-            int nxt = i < n-1 ? i+1 : 0;
-            if(std::min(Y[i],Y[nxt]) > y) continue;
-            if(std::max(Y[i],Y[nxt]) < y) continue;
-            double t = ds(MP(X[i],Y[i]),MP(X[nxt],Y[nxt]),y);
-            max = std::max(max,t);
-        }
-        //DEBUG(max);
-        return pi*max*max;
-    }
-
-    double getVolume(std::vector <int> X, std::vector <int> Y){
-		double a = *std::min_element(all(Y)),b = *std::max_element(all(Y));
-        n = X.size();
-        const int N = 1e6;
-        double sum = 0.0;
-        double h = (b-a)/N;
-        FOR(i,0,N){
-            double y = a+h*i;
-            sum += f(y,X,Y) * (((i == 0) || (i == N)) ? 1 : ((i&1) ? 4 : 2));
-        }
-        sum *= h;sum /= 3.0;
-        return sum;
+class EllysCandies{
+	int n;
+	int a[MAXN];
+	int f[(1<<MAXN)+2];
+	
+	inline int dfs(int S){
+		if(f[S] != -1e9) return f[S];
+		int now = 0;
+		FOR(i,0,n-1) if((S>>i)&1) now += a[i];
+		int &ans = f[S];
+		FOR(i,0,n-1){
+			if((S>>i)&1) continue;
+			ans = std::max(ans,a[i]+now-dfs(S|(1<<i)));
+		}
+		return ans;
+	}
+	
+	public:
+		
+	inline std::string getWinner(std::vector<int> cases){
+		n = cases.size();
+		if(n & 1){
+			return "Elly";
+		}
+		else{
+			return "Kris";
+		}
+		FOR(i,0,n-1) a[i] = cases[i];
+		FOR(i,0,(1<<n)) f[i] = -1e9;
+		f[(1<<n)-1] = 0;
+		int t = dfs(0);
+//		DEBUG(f[0]);DEBUG(f[1]);DEBUG(f[2]);DEBUG(f[3]);
+		if(t > 0) return "Elly";
+		else if(t < 0) return "Kris";
+		else return "Draw";
 	}
 };
-// BEGIN CUT HERE
-// test
-int main(void){
-	PolygonRotation test;
-    std::vector<int> a,b;
-    a.pb(0);a.pb(1);a.pb(1);a.pb(0);
-    b.pb(1);b.pb(1);b.pb(0);b.pb(0);
-	printf("%.10f\n",test.getVolume(a,b));
+#ifdef RainAir
+EllysCandies test;
+
+int main(){
+	std::vector<int> S;
+	FOR(i,1,20) S.pb(1000);
+	std::cout << test.getWinner({1000,1000,2,1}) << std::endl;
+//	std::cout << test.getWinner({42, 13, 17, 666, 55, 100, 3, 20, 81, 42, 123}) << std::endl;
 	return 0;
 }
-// test end
-// END CUT HERE
-
-
+#endif

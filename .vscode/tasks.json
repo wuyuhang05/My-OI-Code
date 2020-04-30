@@ -6,8 +6,8 @@
         {
             "label": "Compile",
             "type": "shell",
-            "command": "g++",
-            "args": ["-g","${file}","-o","a.out","-std=c++11","-O2"],
+            "command": "g++-9",
+            "args": ["-g","${file}","-o","a.out","-std=c++11","-O2","-Wall","-DRainAir"],
             // "windows": {
             //     "command": "g++",  //command 和 args 组合为编译c++命令，即 g++ -g xxx.cpp -o a.out
             //     "isShellCommand": true,
