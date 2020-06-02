@@ -1,0 +1,66 @@
+#include<bits/stdc++.h>
+
+#define fi first
+#define se second
+#define U unsigned
+#define P std::pair<int,int>
+#define LL long long
+#define pb push_back
+#define MP std::make_pair
+#define all(x) x.begin(),x.end()
+#define CLR(i,a) memset(i,a,sizeof(i))
+#define FOR(i,a,b) for(int i = a;i <= b;++i)
+#define ROF(i,a,b) for(int i = a;i >= b;--i)
+#define DEBUG(x) std::cerr << #x << '=' << x << std::endl
+
+const int ha = 1e9 + 7;
+const int MAXN = 1e5 + 5;
+
+std::vector<int> a[MAXN];
+int fac[MAXN],inv[MAXN];
+int n;
+int ans = 0;
+
+inline int qpow(int a,int n=ha-2){
+	int res = 1;
+	while(n){
+		if(n & 1) res = 1ll*res*a%ha;
+		a = 1ll*a*a%ha;
+		n >>= 1;
+	}
+	return res;
+}
+
+inline void prework(){
+    fac[0] = 1;FOR(i,1,MAXN-1) fac[i] = 1ll*fac[i-1]*i%ha;
+    inv[MAXN-1] = qpow(fac[MAXN-1]);ROF(i,MAXN-2,0) inv[i] = 1ll*inv[i+1]*(i+1)%ha;
+}
+
+inline int C(int n,int m){
+    return 1ll*fac[n]*inv[m]%ha*inv[n-m]%ha;
+}
+
+P st[MAXN];
+
+inline void work(std::vector<int> x){
+    int tp = 0,res = 0;
+    FOR(i,0,(int)x.size()-1){
+        st[++tp] = MP(i+1,x[i]);
+        FOR(j,1,tp) st[j].se = std::__gcd(st[j].se,x[i]);
+        int _t = t,t = 0;
+        FOR(j,1,_t) if(stk[j].se == stk[t].se) stk[t].fi = stk[j].fi;
+int st[MAXN];
+        else stk[++t] = stk[j];
+    }
+}
+
+int main(){
+    prework();scanf("%d",&n);
+    FOR(i,1,n){
+        int k;scanf("%d",&k);a[i].resize(k);
+        FOR(j,0,k-1) scanf("%d",&a[i][j]);
+    }
+    FOR(i,1,n) ans += work(a[i]);
+    ans = 1ll*ans*fac[n]%ha;
+    return 0;
+}
