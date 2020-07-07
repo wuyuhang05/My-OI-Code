@@ -1,0 +1,67 @@
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <climits>
+#include <cstdlib>
+#include <cstdio>
+#include <bitset>
+#include <vector>
+#include <cmath>
+#include <ctime>
+#include <queue>
+#include <stack>
+#include <map>
+#include <set>
+
+#define fi first
+#define se second
+#define db double
+#define U unsigned
+#define P std::pair<int,int>
+#define LL long long
+#define pb push_back
+#define MP std::make_pair
+#define all(x) x.begin(),x.end()
+#define CLR(i,a) memset(i,a,sizeof(i))
+#define FOR(i,a,b) for(int i = a;i <= b;++i)
+#define ROF(i,a,b) for(int i = a;i >= b;--i)
+#define DEBUG(x) std::cerr << #x << '=' << x << std::endl
+
+const int MAXN = 50000+5;
+char a[MAXN];
+int n;
+struct Edge{
+    int to,nxt;
+}e[MAXN<<1];
+int head[MAXN],cnt;
+
+inline void add(int u,int v){
+    e[++cnt] = (Edge){v,head[u]};head[u] = cnt;
+    e[++cnt] = (Edge){u,head[v]};head[v] = cnt;
+}
+
+int sz[MAXN],mx[MAXN],rt;
+bool vis[MAXN];
+
+inline void getroot(int v,int fa=0){
+    sz[v] = 1;
+    for(int i = head[v];i;i = e[i].nxt){
+        if(e[i].to == fa || vis[e[i].to]) continue;
+        getroot(e[i].to,v);
+        sz[v] += sz[e[i].to];
+        mx[v] = std::max(mx[v],sz[e[i].to]);
+    }
+    mx[v] = std::max(mx[v],mx[0]-sz[v]);
+    if(mx[rt] < mx[v]) rt = v;
+}
+
+int main(){
+    scanf("%d",&n);
+    scanf("%s",str+1);
+    FOR(i,2,n){
+        int u,v;scanf("%d%d",&u,&v);
+        add(u,v);
+    }
+    getroot(1);
+    return 0;
+}

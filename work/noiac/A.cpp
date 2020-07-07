@@ -16,7 +16,6 @@
 #define fi first
 #define se second
 #define db double
-#define U unsigned
 #define P std::pair<int,int>
 #define LL long long
 #define pb push_back
@@ -26,128 +25,84 @@
 #define FOR(i,a,b) for(int i = a;i <= b;++i)
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
+#define ull unsigned LL
 
-const int MAXN = 1e5 + 5;
-const double EPS = 1e-10;
-const double pi = acos(-1);
+const int MAXN = 50000+5;
+const int BASE = 256;
+char a[MAXN];
+int n;
+struct Edge{
+    int to,nxt;
+}e[MAXN<<1];
+int head[MAXN],cnt;
 
-inline int sgn(double x){
-    if(std::fabs(x) <= EPS) return 0;
-    if(x > 0) return 1;
-    return -1;
+inline void add(int u,int v){
+    e[++cnt] = (Edge){v,head[u]};head[u] = cnt;
+    e[++cnt] = (Edge){u,head[v]};head[v] = cnt;
 }
 
-struct Node{
-    double x,y;
-    Node(double x=0,double y=0) : x(x),y(y) {}
+int sz[MAXN],mx[MAXN],rt;
+bool vis[MAXN];
 
-    inline Node operator + (const Node &t) const {
-        return Node(x+t.x,y+t.y);
+inline void getroot(int v,int fa=0){
+    sz[v] = 1;
+    for(int i = head[v];i;i = e[i].nxt){
+        if(e[i].to == fa || vis[e[i].to]) continue;
+        getroot(e[i].to,v);
+        sz[v] += sz[e[i].to];
+        mx[v] = std::max(mx[v],sz[e[i].to]);
     }
-
-    inline Node operator - (const Node &t) const {
-        return Node(x-t.x,y-t.y);
-    }
-
-    inline Node operator * (const Node &t) const {
-        return Node(x*t.x-y*t.y,x*t.y+y*t.x);
-    }
-
-    inline Node operator * (const double &d) const {
-        return Node(x*d,y*d);
-    }
-
-    inline bool operator == (const Node &t) const {
-        return sgn(x-t.x) == 0 && sgn(y-t.y) == 0;
-    }
-
-    friend bool operator != (const Node &a,const Node &b){
-        return !(a==b);
-    }
-}sm[MAXN<<2],tag[MAXN<<2],mul[MAXN<<2],a[MAXN];
-#define lc ((x)<<1)
-#define rc ((x)<<1|1)
-
-inline void cover1(int x,int l,int r,Node d){
-    sm[x] = sm[x]+d*(r-l+1);tag[x] = tag[x]+d;
+    mx[v] = std::max(mx[v],mx[0]-sz[v]);
+    if(mx[rt] < mx[v]) rt = v;
 }
 
-inline void cover2(int x,Node d){
-    sm[x] = sm[x]*d;mul[x] = mul[x]*d;tag[x] = tag[x]*d;
-}
+int ans = 0;
+ull sm[MAXN],ms[MAXN],pw[MAXN];
+int dep[MAXN];
+bool hw[MAXN];
+std::vector<int> S;
 
-inline void pushdown(int x,int l,int r){
-    int mid = (l + r) >> 1;
-    if(mul[x] != Node(1,0)){
-        cover2(lc,mul[x]);cover2(rc,mul[x]);
-        mul[x] = Node(1,0);
+inline void dfs(int v,int fa=0){
+    S.pb(v);
+    sm[dep[v]] = sm[dep[v]-1]*BASE+str[v];
+    ms[dep[v]] = ms[dep[v]-1]+str[v]*pw[dep[v]-1];
+    int t = S.size()/2;
+    if(S.size() == 1) hw[v] = 1;
+    else if(S.size()&1){//[1..t-1]=[v..t+1]
+        hw[v] = ms[t-1] == (ull)(sm[v]-sm[t]*pw[v-t]);
     }
-    if(tag[x] != Node(0,0)){
-        cover1(lc,l,mid,tag[x]);cover1(rc,mid+1,r,tag[x]);
-        tag[x] = Node(0,0);
+    else{// [1..t-1]=[v..t]
+        hw[v] = ms[t-1] == (ull)(sm[v]-sm[t]*pw[v-t+1]);
+    }
+    if(hw[v]) ans = std::max(ans,dep[v]);
+    for(int i = head[v];i;i = e[i].nxt){
+        if(e[i].to == fa || vis[e[i].to]) continue;
+        dep[e[i].to] = dep[v] + 1;dfs(e[i].to,v);
+    }
+    S.pop_back();
+}
+
+inline void getans(int v){
+    S.clear();dep[v] = 1;dfs(v);
+}
+
+inline void work(int v){
+    vis[v] = 1;getans(v);
+    for(int i = head[v];i;i = e[i].nxt){
+        if(vis[e[i].to]) continue;
+        getroot(e[i].to);work(rt);
     }
 }
-
-inline void build(int x,int l,int r){
-    mul[x] = Node(1,0);
-    if(l == r){sm[x] = a[l];return;}
-    int mid = (l + r) >> 1;
-    build(lc,l,mid);build(rc,mid+1,r);
-    sm[x] = sm[lc]+sm[rc];
-}
-
-inline void modify1(int x,int l,int r,int L,int R,Node d){
-    if(l == L && r == R){cover1(x,l,r,d);return;}
-    int mid = (l + r) >> 1;pushdown(x,l,r);
-    if(R <= mid) modify1(lc,l,mid,L,R,d);
-    else if(L > mid) modify1(rc,mid+1,r,L,R,d);
-    else modify1(lc,l,mid,L,mid,d),modify1(rc,mid+1,r,mid+1,R,d);
-    sm[x] = sm[lc]+sm[rc];
-}
-
-inline void modify2(int x,int l,int r,int L,int R,Node d){
-    if(l == L && r == R){cover2(x,d);return;}
-    int mid = (l+r)>>1;pushdown(x,l,r);
-    if(R <= mid) modify2(lc,l,mid,L,R,d);
-    else if(L > mid) modify2(rc,mid+1,r,L,R,d);
-    else modify2(lc,l,mid,L,mid,d),modify2(rc,mid+1,r,mid+1,R,d);
-    sm[x] = sm[lc]+sm[rc];
-}
-
-inline Node query(int x,int l,int r,int L,int R){
-    if(l == L && r == R) return sm[x];
-    int mid = (l + r) >> 1;pushdown(x,l,r);
-    if(R <= mid) return query(lc,l,mid,L,R);
-    if(L > mid) return query(rc,mid+1,r,L,R);
-    return query(lc,l,mid,L,mid)+query(rc,mid+1,r,mid+1,R);
-}
-
-Node ans[MAXN];
-
-inline void fin(int x,int l,int r){
-    if(l == r){
-        ans[l] = sm[x];
-        return;
-    }
-    int mid = (l + r) >> 1;pushdown(x,l,r);
-    fin(lc,l,mid);fin(rc,mid+1,r);
-}
-
-int n,q;
 
 int main(){
-    scanf("%d%d",&n,&q);
-    FOR(i,1,n) scanf("%lf%lf",&a[i].x,&a[i].y);
-    build(1,1,n);
-    FOR(i,1,q){
-        int l,r;scanf("%d%d",&l,&r);
-        Node t = query(1,1,n,l,r)*(1.0/(r-l+1));
-        printf("%.10lf %.10lf\n",t.x,t.y);
-        modify1(1,1,n,l,r,t*(-1));
-        modify2(1,1,n,l,r,Node(cos(pi/3),sin(pi/3)));
-        modify1(1,1,n,l,r,t);
+    pw[0] = 1;FOR(i,1,MAXN-1) pw[i] = pw[i-1]*BASE;
+    scanf("%d",&n);
+    scanf("%s",str+1);
+    FOR(i,2,n){
+        int u,v;scanf("%d%d",&u,&v);
+        add(u,v);
     }
-    fin(1,1,n);
-    FOR(i,1,n) printf("%.10lf %.10lf\n",ans[i].x,ans[i].y);
+    getroot(1);
+    work(rt);
     return 0;
 }
