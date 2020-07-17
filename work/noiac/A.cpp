@@ -16,6 +16,7 @@
 #define fi first
 #define se second
 #define db double
+#define U unsigned
 #define P std::pair<int,int>
 #define LL long long
 #define pb push_back
@@ -25,84 +26,79 @@
 #define FOR(i,a,b) for(int i = a;i <= b;++i)
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
-#define ull unsigned LL
 
-const int MAXN = 50000+5;
-const int BASE = 256;
-char a[MAXN];
-int n;
-struct Edge{
-    int to,nxt;
-}e[MAXN<<1];
-int head[MAXN],cnt;
+const int MAXN = 2e5 + 5;
+const double EPS = 1e-10;
+int a[MAXN],n,L,R;
+int x[MAXN],y[MAXN];
 
-inline void add(int u,int v){
-    e[++cnt] = (Edge){v,head[u]};head[u] = cnt;
-    e[++cnt] = (Edge){u,head[v]};head[v] = cnt;
+inline int sgn(double x){
+    if(std::fabs(x) <= EPS) return 0;
+    if(x < 0) return -1;
+    return 1;
 }
 
-int sz[MAXN],mx[MAXN],rt;
-bool vis[MAXN];
+int cs;
 
-inline void getroot(int v,int fa=0){
-    sz[v] = 1;
-    for(int i = head[v];i;i = e[i].nxt){
-        if(e[i].to == fa || vis[e[i].to]) continue;
-        getroot(e[i].to,v);
-        sz[v] += sz[e[i].to];
-        mx[v] = std::max(mx[v],sz[e[i].to]);
+inline int get(double M,int p){
+    if(cs >= 6){
+        double mx = -1e18;int ps = -1;
+        FOR(i,std::max(1,p-1),std::min(n,p+1)){
+            double gx = y[i]-(R-L)+1.0*(R-L)*((x[i] <= M) ? 1.0*(x[i]-L)/(M-L):1.0*(R-x[i])/(R-M));
+            if(mx < gx){
+                mx = gx;ps = i;
+            }
+        }
+        return ps;
     }
-    mx[v] = std::max(mx[v],mx[0]-sz[v]);
-    if(mx[rt] < mx[v]) rt = v;
-}
-
-int ans = 0;
-ull sm[MAXN],ms[MAXN],pw[MAXN];
-int dep[MAXN];
-bool hw[MAXN];
-std::vector<int> S;
-
-inline void dfs(int v,int fa=0){
-    S.pb(v);
-    sm[dep[v]] = sm[dep[v]-1]*BASE+str[v];
-    ms[dep[v]] = ms[dep[v]-1]+str[v]*pw[dep[v]-1];
-    int t = S.size()/2;
-    if(S.size() == 1) hw[v] = 1;
-    else if(S.size()&1){//[1..t-1]=[v..t+1]
-        hw[v] = ms[t-1] == (ull)(sm[v]-sm[t]*pw[v-t]);
+    double mx = -1e18;int ps = -1;
+    FOR(i,1,n){
+        double gx = y[i]-(R-L)+1.0*(R-L)*((x[i] <= M) ? 1.0*(x[i]-L)/(M-L):1.0*(R-x[i])/(R-M));
+        if(p == 9){
+ //           DEBUG(gx);
+        }
+        if(mx < gx){
+            mx = gx;ps = i;
+        }
     }
-    else{// [1..t-1]=[v..t]
-        hw[v] = ms[t-1] == (ull)(sm[v]-sm[t]*pw[v-t+1]);
-    }
-    if(hw[v]) ans = std::max(ans,dep[v]);
-    for(int i = head[v];i;i = e[i].nxt){
-        if(e[i].to == fa || vis[e[i].to]) continue;
-        dep[e[i].to] = dep[v] + 1;dfs(e[i].to,v);
-    }
-    S.pop_back();
-}
-
-inline void getans(int v){
-    S.clear();dep[v] = 1;dfs(v);
-}
-
-inline void work(int v){
-    vis[v] = 1;getans(v);
-    for(int i = head[v];i;i = e[i].nxt){
-        if(vis[e[i].to]) continue;
-        getroot(e[i].to);work(rt);
-    }
+    return ps;
 }
 
 int main(){
-    pw[0] = 1;FOR(i,1,MAXN-1) pw[i] = pw[i-1]*BASE;
-    scanf("%d",&n);
-    scanf("%s",str+1);
-    FOR(i,2,n){
-        int u,v;scanf("%d%d",&u,&v);
-        add(u,v);
+    freopen("A.in","r",stdin);
+    freopen("A.out","w",stdout);
+    scanf("%d%d%d%d",&cs,&n,&L,&R);
+    FOR(i,1,n) scanf("%d",x+i);
+    FOR(i,1,n) scanf("%d",y+i);
+    double las = L;
+    double sm = 0;x[n+1] = x[n+2] = R;
+    FOR(i,1,n){
+        if(get(x[i],i) != i){
+            printf("%.12f\n",0.0);
+            continue;
+        }
+        int ll = i,rr = n,ans = -1;
+        while(ll <= rr){
+            int mid = (ll + rr) >> 1;
+            if(get(x[mid],i) == i) ans = mid,ll = mid+1;
+            else rr = mid-1;
+        }
+        double l = x[ans],r = x[ans+1];
+        FOR(jjj,1,50){
+            double mid = (l + r) / 2.0;
+            if(get(mid,i) == i) l = mid;
+            else r = mid;
+        }
+        l = (l+r)/2.0;
+   //     printf("%.10f %.10f %d\n",las,l,x[i]);
+        if(las > l){
+            printf("%.12f\n",0.0);
+            continue;
+        }
+        printf("%.12f\n",1.0*(l-las)/(R-L));
+//        sm += 1.0*(l-las)/(R-L);
+        las = l;
     }
-    getroot(1);
-    work(rt);
+//    printf("%.10f\n",sm);
     return 0;
 }
