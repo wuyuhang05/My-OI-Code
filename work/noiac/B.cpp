@@ -1,4 +1,3 @@
-#pragma GCC optimize("Ofast")
 #include <algorithm>
 #include <iostream>
 #include <cstring>
@@ -27,113 +26,60 @@
 #define FOR(i,a,b) for(int i = a;i <= b;++i)
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
+const int MAXN = 1e5 + 5;
+int n,m,s;
+int A[1000000+5];
+const int ha = 998244353;
+int a[MAXN];
 
-const int MAXN = 1000+5;
-int n,q;
-int a[MAXN][MAXN];
+inline void gen(){
+    A[0] = s;
+    FOR(i,1,1000000) A[i] = (1ll*A[i-1]*100000005%ha+20150609)%ha;
+    FOR(i,1,n) a[i] = A[i]%2;
+}
 
-namespace MCMF{
-    struct Edge{
-        int fr,to,w,c,nxt;
-    }e[MAXN*MAXN+MAXN*3];
-    int head[MAXN],cnt=1;
+int len,l,r;
 
-    inline void add(int u,int v,int w,int c){
-        e[++cnt] = (Edge){u,v,w,c,head[u]};head[u] = cnt;
-        e[++cnt] = (Edge){v,u,0,-c,head[v]};head[v] = cnt;
+inline bool cmp(int x,int y){
+//    DEBUG(1);
+    FOR(i,1,len){
+        if(a[x] < a[y]) return 1;
+        if(a[x] > a[y]) return 0;
+        x++;y++;
+        if(x == r+1) x = l;
+        if(y == r+1) y = l;
     }
-
-    LL dis[MAXN];int pre[MAXN];
-    bool inq[MAXN];
-    int N,S,T;
-
-    inline bool spfa(){
-        std::queue<int> q;
-        FOR(i,0,N) dis[i] = 1e18,pre[i] = -1;
-        dis[S] = 0;pre[S] = 0;q.push(S);inq[S] = 1;
-        while(!q.empty()){
-            int v = q.front();q.pop();
-            inq[v] = 0;
-            for(int i = head[v];i;i = e[i].nxt){
-                if(e[i].w > 0 && dis[e[i].to] > dis[v]+e[i].c){
-//                    DEBUG(e[i].to);DEBUG(e[i].c);
-                    dis[e[i].to] = dis[v]+e[i].c;pre[e[i].to] = i;
-                    if(!inq[e[i].to]) q.push(e[i].to),inq[e[i].to] = 1;
-                }
-            }
-        }
-        return pre[T]!=-1;
-    }
-
-    LL maxFlow,minCost;
-
-    inline void work(){
-        while(spfa()){
-            int flow = 1e9;
-            for(int v = T;v != S;v = e[pre[v]].fr){
-                flow = std::min(flow,e[pre[v]].w);
-            }
-            maxFlow += flow;
-            for(int v = T;v != S;v = e[pre[v]].fr){
-                minCost += 1ll*flow*e[pre[v]].c;
-                e[pre[v]].w -= flow;
-                e[pre[v]^1].w += flow;
-            }
-        }
-    }
-};
-using namespace MCMF;
-
-P qq[MAXN*100];
-LL ans[MAXN*100];
+    return 1;
+}
 
 int main(){
-//    freopen("B.in","r",stdin);
-    int cs;scanf("%d",&cs);
-    scanf("%d%d",&n,&q);
-    FOR(i,1,n) FOR(j,1,n) scanf("%d",&a[i][j]);
-    if(cs == 1){
-        FOR(i,1,q){
-            int C;scanf("%d",&C);
-            printf("%d",a[1][1]);printf(".0\n");
-        }
-        return 0;
-    }
-/*    if(cs == 3){
-        S = 2*n+1;N = T = 2*n+2;
-        FOR(i,1,n){
-            FOR(j,1,n){
-                add(i,j+n,1,-a[i][j]);
+    scanf("%d%d%d",&n,&m,&s);
+    gen();
+    FOR(i,1,m){
+        int a = 1+A[n+4*(i-1)+1]%n,b = 1+A[n+4*(i-1)+2]%n,c=1+A[n+4*(i-1)+3]%n,d=1+A[n+4*(i-1)+4]%n;
+        int l1 = std::min(a,b),r1 = std::max(a,b),l2 = std::min(c,d),r2 = std::max(c,d);
+        std::vector<int> S1,S2;
+        FOR(i,l1,r1) S1.pb(i);
+        FOR(i,l2,r2) S2.pb(i);
+        len = S1.size();l = l1;r = r1;std::sort(all(S1),cmp);
+        len = S2.size();l = l2;r = r2;std::sort(all(S2),cmp);
+        int ans = 0,lim = std::min(S1.size(),S2.size());
+        FOR(i,0,lim-1){
+            int p1 = S1[i]+(int)S1.size()-1,p2 = S2[i]+(int)S2.size()-1;
+            if(p1 > r1) p1 -= (int)S1.size();
+            if(p2 > r2) p2 -= (int)S2.size();
+            if(::a[p1] > ::a[p2]){
+                ans = 1;break;
+            }
+            if(::a[p1] < ::a[p2]){
+                ans = -1;break;
             }
         }
-        FOR(i,1,n) add(S,i,1,0);
-        FOR(i,n+1,2*n) add(i,T,1,0);
-        work();
-        printf("%lld",-minCost);printf(".0\n");
-        return 0;
-    }*/
-    S = 2*n+3;N = T = 2*n+4;
-    FOR(i,1,n) FOR(j,1,n) add(i,j+n,1,-a[i][j]);
-    FOR(i,1,n) add(2*n+1,i,1,0);
-    FOR(i,n+1,2*n) add(i,2*n+2,1,0);
-    FOR(i,1,q) scanf("%d",&qq[i].fi),qq[i].se = i;
-    std::sort(qq+1,qq+q+1);
-    int e1=0,e2=0;
-    e1=cnt+1;add(S,2*n+1,0,0);e2=cnt+1;add(2*n+2,T,0,0);
-    FOR(i,1,q){
-        e[e1].w += qq[i].fi-qq[i-1].fi;
-        e[e2].w += qq[i].fi-qq[i-1].fi;
-        work();
-        ans[qq[i].se] = -minCost;
-    }
-    FOR(i,1,q) printf("%lld.0\n",ans[i]);
-    exit(0);
-    FOR(i,1,q){
-        int C = 0;scanf("%d",&C);
-        FOR(i,0,2*n+4) head[i] = 0;cnt = 1;maxFlow = minCost = 0;
-        add(S,2*n+1,C,0);add(2*n+2,T,C,0);
-        work();
-        printf("%lld",-minCost);printf(".0\n");
+        if(!ans){
+            if(S1.size() < S2.size()) ans = -1;
+            if(S1.size() > S2.size()) ans = 1;
+        }
+        printf("%d\n",ans);
     }
     return 0;
 }

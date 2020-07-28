@@ -26,79 +26,39 @@
 #define FOR(i,a,b) for(int i = a;i <= b;++i)
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
+#define int LL
+const int MAXN = 20+5;
+LL a[MAXN];
+int n,m;
+int cnt[MAXN];
 
-const int MAXN = 2e5 + 5;
-const double EPS = 1e-10;
-int a[MAXN],n,L,R;
-int x[MAXN],y[MAXN];
-
-inline int sgn(double x){
-    if(std::fabs(x) <= EPS) return 0;
-    if(x < 0) return -1;
-    return 1;
+inline int C(int n,int m){
+    LL ans = 1;
+    FOR(i,1,n) ans *= i;
+    FOR(i,1,m) ans /= i;
+    FOR(i,1,n-m) ans /= i;
+    return ans;
 }
 
-int cs;
-
-inline int get(double M,int p){
-    if(cs >= 6){
-        double mx = -1e18;int ps = -1;
-        FOR(i,std::max(1,p-1),std::min(n,p+1)){
-            double gx = y[i]-(R-L)+1.0*(R-L)*((x[i] <= M) ? 1.0*(x[i]-L)/(M-L):1.0*(R-x[i])/(R-M));
-            if(mx < gx){
-                mx = gx;ps = i;
+signed main(){
+    scanf("%lld%lld",&n,&m);LL ss = 0;
+    FOR(i,0,n-1) scanf("%lld",a+i),ss += a[i];
+    int ans = 0;
+    FOR(S,0,(1<<n)-1){
+        LL sm = 0;
+        FOR(i,0,n-1){
+            if((S>>i)&1) sm += a[i];
+        }
+        if(sm >= m) continue;
+        bool flag = 1;
+        FOR(i,0,n-1){
+            if((S>>i)&1) continue;
+            if(sm+a[i]<m){
+                flag = 0;break;
             }
         }
-        return ps;
+        if(flag) ans++;
     }
-    double mx = -1e18;int ps = -1;
-    FOR(i,1,n){
-        double gx = y[i]-(R-L)+1.0*(R-L)*((x[i] <= M) ? 1.0*(x[i]-L)/(M-L):1.0*(R-x[i])/(R-M));
-        if(p == 9){
- //           DEBUG(gx);
-        }
-        if(mx < gx){
-            mx = gx;ps = i;
-        }
-    }
-    return ps;
-}
-
-int main(){
-    freopen("A.in","r",stdin);
-    freopen("A.out","w",stdout);
-    scanf("%d%d%d%d",&cs,&n,&L,&R);
-    FOR(i,1,n) scanf("%d",x+i);
-    FOR(i,1,n) scanf("%d",y+i);
-    double las = L;
-    double sm = 0;x[n+1] = x[n+2] = R;
-    FOR(i,1,n){
-        if(get(x[i],i) != i){
-            printf("%.12f\n",0.0);
-            continue;
-        }
-        int ll = i,rr = n,ans = -1;
-        while(ll <= rr){
-            int mid = (ll + rr) >> 1;
-            if(get(x[mid],i) == i) ans = mid,ll = mid+1;
-            else rr = mid-1;
-        }
-        double l = x[ans],r = x[ans+1];
-        FOR(jjj,1,50){
-            double mid = (l + r) / 2.0;
-            if(get(mid,i) == i) l = mid;
-            else r = mid;
-        }
-        l = (l+r)/2.0;
-   //     printf("%.10f %.10f %d\n",las,l,x[i]);
-        if(las > l){
-            printf("%.12f\n",0.0);
-            continue;
-        }
-        printf("%.12f\n",1.0*(l-las)/(R-L));
-//        sm += 1.0*(l-las)/(R-L);
-        las = l;
-    }
-//    printf("%.10f\n",sm);
+    printf("%lld\n",ans);
     return 0;
 }

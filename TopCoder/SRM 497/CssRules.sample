@@ -1,0 +1,46 @@
+-- Example 0
+1
+<b id='x' style='color:red'></b>
+
+1
+-- Example 1
+4
+<b id='x' style='color:red'>
+<b id='y' style='color:red'>
+<b id='z' style='color:red'>
+</b></b></b>
+
+2
+-- Example 2
+8
+<b id='x' style='color:red'>
+<b id='y' style='color:red'>
+<b id='w' style='color:red'>
+</b>
+</b>
+<u id='z' style='color:red'>
+</u>
+</b>
+
+3
+-- Example 3
+8
+<b id='x' style='color:red'>
+<i id='y' style='color:black'>
+<u id='w' style='color:white'>
+</u>
+</i>
+<u id='z' style='color:yellow'>
+</u>
+</b>
+
+4
+-- Example 4
+5
+<b id='x' style='col
+or:red'></b>
+<b id=
+'xx' style='color
+:red'></b>
+
+2
