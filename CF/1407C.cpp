@@ -14,28 +14,26 @@
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
+inline int query(int x,int y){
+	printf("? %d %d\n",x,y);std::fflush(stdout);
+	int res;scanf("%d",&res);return res;
+}
+
 const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN];
-int n,m;
+int p[MAXN];bool vis[MAXN];
 
 int main(){
-	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
+	int n;scanf("%d",&n);
+	int las = 1;
+	FOR(i,2,n){
+		int t1 = query(las,i),t2 = query(i,las);
+		if(t1 > t2) p[las] = t1,las = i;
+		else p[i] = t2;
 	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
-		return 0;
-	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
+	FOR(i,1,n) vis[p[i]] = 1;
+	FOR(i,1,n) if(!vis[i]) p[las] = i;
+	putchar('!');
+	FOR(i,1,n) printf(" %d",p[i]);
+	puts("");std::fflush(stdout);
 	return 0;
 }

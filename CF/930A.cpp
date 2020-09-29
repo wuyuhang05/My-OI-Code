@@ -15,27 +15,18 @@
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
 const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN];
-int n,m;
+int dep[MAXN],cnt[MAXN];
+int n;
 
 int main(){
-	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
+	scanf("%d",&n);
+	FOR(i,2,n){
+		int f;scanf("%d",&f);
+		dep[i] = dep[f]+1;
 	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
-		return 0;
-	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
+	FOR(i,1,n) cnt[dep[i]]++;
+	int ans = 0;
+	FOR(i,0,n) ans += cnt[i]%2;
+	printf("%d\n",ans);
 	return 0;
 }

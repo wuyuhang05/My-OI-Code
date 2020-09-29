@@ -14,28 +14,23 @@
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN];
-int n,m;
+const int MAXN = 2e5 +5;
+
+char str[MAXN];
 
 int main(){
-	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
-	}
-	if(a[n] == b[1]){
+	int T;scanf("%d",&T);
+	while(T--){
 		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
+		int n;scanf("%d",&n);scanf("%s",str+1);
+		std::map<int,int> S;
+		S[0] = 1;int sm = 0;
+		FOR(i,1,n){
+			sm += str[i]-'0';
+			ans += S[sm-i];
+			S[sm-i]++;
+		}
 		printf("%lld\n",ans);
-		return 0;
 	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
 	return 0;
 }

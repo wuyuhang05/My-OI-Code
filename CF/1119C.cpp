@@ -14,28 +14,34 @@
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN];
+const int MAXN = 500+5;
 int n,m;
+int a[MAXN][MAXN];
 
 int main(){
 	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
+	FOR(i,1,n) FOR(j,1,m) scanf("%d",&a[i][j]);
+	FOR(i,1,n) FOR(j,1,m){
+		int x;scanf("%d",&x);a[i][j] ^= x;
 	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
-		return 0;
+	FOR(i,1,n){
+		int sm = 0;
+		FOR(j,1,m) sm += a[i][j];
+		if(sm&1){
+			puts("No");
+			return 0;
+		}
 	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
+	FOR(i,1,m){
+		int sm = 0;
+		FOR(j,1,n){
+			sm += a[j][i];
+		}
+		if(sm&1){
+			puts("No");
+			return 0;
+		}
+	}
+	puts("Yes");
 	return 0;
 }

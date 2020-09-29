@@ -15,27 +15,20 @@
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
 const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN];
-int n,m;
+int n,x,a[MAXN],b[MAXN];
+std::multiset<int> S;
 
 int main(){
-	scanf("%d%d",&n,&m);
+	scanf("%d%d",&n,&x);
 	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
+	FOR(i,1,n) scanf("%d",b+i);std::sort(b+1,b+n+1);
+	FOR(i,1,n) S.insert(b[i]);
+	int c = 0;
+	ROF(i,n,1){
+		auto p = S.lower_bound(x-a[i]);
+		if(p == S.end()) break;
+		S.erase(p);c++;
 	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
-		return 0;
-	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
+	printf("%d %d\n",1,c);
 	return 0;
 }

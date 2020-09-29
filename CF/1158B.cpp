@@ -14,28 +14,25 @@
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN];
-int n,m;
-
 int main(){
-	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
-	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
+	int n,k;scanf("%d%d",&n,&k);
+	if(n == k){
+		FOR(i,1,n) putchar('1');
 		return 0;
 	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
+	if(k == 1){
+		FOR(i,1,n-1) putchar('0');
+		putchar('1');
+		return 0;
+	}
+	int t = (n-k+2)/2;
+	int tt = n/t;
+	FOR(i,1,tt){
+		putchar('1');
+		FOR(j,1,t-1) putchar('0');
+	}
+	int rr = n-tt*t;
+	if(rr) putchar('1'),--rr;
+	FOR(i,1,rr) putchar('0');puts("");
 	return 0;
 }

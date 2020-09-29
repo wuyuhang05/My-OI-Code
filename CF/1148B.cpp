@@ -13,29 +13,29 @@
 #define FOR(i,a,b) for(int i = a;i <= b;++i)
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
-
-const int MAXN = 1e5 + 5;
+#define int LL
+const int MAXN = 2e5 + 5;
 int a[MAXN],b[MAXN];
-int n,m;
 
-int main(){
-	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
-	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
+signed main(){
+	int k,n,m,ta,tb;scanf("%lld%lld%lld%lld%lld",&n,&m,&ta,&tb,&k);
+	if(k >= n || k >= m){
+		puts("-1");
 		return 0;
 	}
+	FOR(i,1,n) scanf("%lld",a+i);
+	FOR(i,1,m) scanf("%lld",b+i);
+	int tp = 1;
 	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
+	FOR(i,1,std::min(n,k+1)){
+		int t = k-i+1;
+		while(tp <= m && b[tp] < a[i]+ta) tp++;
+		if(tp+t > m){
+			puts("-1");return 0;
+		}
+		ans = std::max(ans,b[tp+t]+tb);
+	}
+	if(ans == 1e18) ans = -1;
 	printf("%lld\n",ans);
 	return 0;
 }

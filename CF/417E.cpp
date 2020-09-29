@@ -14,28 +14,30 @@
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 1e5 + 5;
+const int MAXN = 100+5;
 int a[MAXN],b[MAXN];
-int n,m;
 
 int main(){
-	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
+	int n,m;scanf("%d%d",&n,&m);
+	if(n <= 2){
+		if(n == 1) a[1] = 1;
+		if(n == 2) a[1] = 3,a[2] = 4;
 	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
-		return 0;
+	else{
+		a[1] = n-2;FOR(i,2,n) a[i] = 2;
 	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
+	if(m <= 2){
+		if(m == 1) b[1] = 1;
+		if(m == 2) b[1] = 3,b[2] = 4;
+	}
+	else{
+		b[1] = m-2;FOR(i,2,m) b[i] = 2;
+	}
+	FOR(i,1,n){
+		FOR(j,1,m){
+			printf("%d ",a[i]*b[j]);
+		}
+		puts("");
+	}
 	return 0;
 }

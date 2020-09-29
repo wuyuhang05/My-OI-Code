@@ -14,28 +14,21 @@
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
-const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN];
-int n,m;
+const int MAXN = 3e5 + 5;
+int n,x,y;
+char str[MAXN];
 
 int main(){
-	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
+	scanf("%d%d%d",&n,&x,&y);
+	scanf("%s",str+1);int m = 0;
+	str[0] = '1';
+	FOR(i,1,n){
+		if(str[i-1] == '1' && str[i] == '0') ++m;
 	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
+	if(m == 0){
+		puts("0");
 		return 0;
 	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
+	printf("%lld\n",std::min(1ll*m*y,1ll*(m-1)*x+y));
 	return 0;
 }

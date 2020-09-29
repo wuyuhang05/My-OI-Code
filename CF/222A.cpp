@@ -15,27 +15,31 @@
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
 const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN];
-int n,m;
+int n,k,a[MAXN];
+int cnt[MAXN],now;
+
+inline void add(int x){
+	cnt[x]++;if(cnt[x] == 1) now++;
+}
+
+inline void del(int x){
+	cnt[x]--;if(cnt[x] == 0) now--;
+}
 
 int main(){
-	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
-	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
+	scanf("%d%d",&n,&k);
+	FOR(i,1,n) scanf("%d",a+i);
+	bool flag = 1;
+	FOR(i,k+1,n) flag &= (a[i] == a[i-1]);
+	if(!flag){
+		puts("-1");
 		return 0;
 	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
+	ROF(i,k-1,0){
+		if(a[i] != a[k]){
+			printf("%d\n",i);
+			return 0;
+		}
+	}
 	return 0;
 }

@@ -15,27 +15,20 @@
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
 const int MAXN = 1e5 + 5;
-int a[MAXN],b[MAXN];
-int n,m;
+int n,a[MAXN],m;
+LL f[MAXN];
 
 int main(){
-	scanf("%d%d",&n,&m);
-	FOR(i,1,n) scanf("%d",a+i);std::sort(a+1,a+n+1);
-	FOR(i,1,m) scanf("%d",b+i);std::sort(b+1,b+m+1);
-	if(a[n] > b[1]){
-		puts("-1");return 0;
+	scanf("%d",&n);
+	FOR(i,1,n){
+		int x;scanf("%d",&x);++a[x];m = std::max(m,x);
 	}
-	if(a[n] == b[1]){
-		LL ans = 0;
-		FOR(i,1,m) ans += b[i];
-		FOR(i,1,n-1) ans += 1ll*m*a[i];
-		printf("%lld\n",ans);
-		return 0;
+	FOR(i,0,m) f[i] = 1e18;
+	f[0] = 0;
+	FOR(i,1,m){
+		f[i] = f[i-1];
+		f[i] = std::max(f[i],(i==1?0:f[i-2])+1ll*a[i]*i);
 	}
-	LL ans = 0;
-	FOR(i,1,m) ans += b[i]; 
-	ans += a[n];ans -= a[n-1];
-	FOR(i,1,n-1) ans += 1ll*a[i]*m;
-	printf("%lld\n",ans);
+	printf("%lld\n",f[m]);
 	return 0;
 }
