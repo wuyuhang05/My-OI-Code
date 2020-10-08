@@ -14,6 +14,20 @@
 #define ROF(i,a,b) for(int i = a;i >= b;--i)
 #define DEBUG(x) std::cerr << #x << '=' << x << std::endl
 
+const int MAXN = 5e5 + 5;
+int a[MAXN],n,b[MAXN];
+
 int main(){
-	return 0;
+    scanf("%d",&n);
+    long double a=0,b=0;
+    FOR(i,1,n) a += log(i);
+    ROF(i,n,1){
+        b += log(i);
+        a -= log(i);
+        if(a < b){
+            printf("%d\n",i);
+            break;
+        }
+    }
+    return 0;
 }
